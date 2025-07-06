@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.pyc
+*.pyd
+*.pyo
+.Python/
+build/
+develop-eggs/
+dist/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.pkl
+*.log
+
+# Conda environments
+.conda/
+.condarc
+.venv/
+env/
+venv/
+*siya_env*/ # Ignored specific Conda env folder if created directly in project
+.ipynb_checkpoints/ # Jupyter notebooks
+
+# IDEs and Editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.DS_Store # macOS specific
+Thumbs.db # Windows specific
+
+# Specific to SIYA project
+.env # CRITICAL: This ignores your actual .env file with API keys
+*.csv # You might want to ignore all .csv initially or only output.csv if it's large
+output.csv # Specifically ignore the output CSV if it gets very large and shouldn't be versioned
