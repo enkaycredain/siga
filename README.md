@@ -12,17 +12,19 @@ To set up your development environment and install dependencies, please refer to
 
 ---
 
-## Project Tasks
-
-This section tracks the progress of the SIYA development.
-
 ### Phase 1: Project Setup and Core Environment
 
 * [x] Task 1: Project Repository Initialization (Completed)
 * [x] Task 2: `README.md` Creation & Requirements Documentation (Completed)
-* [x] Task 3: Conda Environment Setup (Completed - *Mark this as completed now*)
-* [ ] Task 4: `.env` File for Configuration
-* [ ] Task 5: Basic Logging Configuration
+* [x] Task 3: Conda Environment Setup (Completed)
+* [x] Task 4: `.env` File for Configuration (Completed)
+* [x] Task 5: Basic Logging Configuration (Completed)
+
+---
+
+## Logging
+
+SIYA provides comprehensive logging at `INFO`, `DEBUG` (for TRACE), `WARNING`, and `ERROR` levels to both the console and optional log files. Logs are timestamped and provide clear insights into agent operations.
 
 ---
 
