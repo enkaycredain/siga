@@ -20,6 +20,7 @@ To set up your development environment and install dependencies, please refer to
 * [x] Task 4: `.env` File for Configuration (Completed)
 * [x] Task 5: Basic Logging Configuration (Completed)
 
+
 ### Phase 2: Core Agent Logic & AI Integration
 
 * [x] Task 6: Configuration Loading & CLI for Provider Selection (Part 1 - Improved UX)
@@ -35,7 +36,7 @@ To set up your development environment and install dependencies, please refer to
     * **Objective:** Define a common interface for AI models, *including a method to list available models from the provider*.
     * **Details:**
         * Create `src/ai_models/base.py`.
-        * Define an abstract base class (ABC) with methods like `extract_company_info(self, company_name: str) -> dict` and `list_available_models(self) -> list[str]`.
+        * Define an abstract base class (ABC) with methods like `extract_company_info(self, company_name: str, model_name: str, prompt_template: str) -> dict` and `list_available_models(self) -> list[str]`.
         * Include a `get_preferred_model(self) -> str` property/method to retrieve the preferred default model for that provider (from config).
 * [x] Task 8: OpenAI Integration (Initial: `extract_company_info` & `list_available_models`) (Completed)
     * **Objective:** Implement OpenAI concrete class supporting information extraction and model listing.
@@ -112,31 +113,32 @@ This phase focuses on enabling SIYA to process multiple companies from a CSV fil
 
 This phase focuses on improving SIYA's output formats and introducing a flexible system for managing AI prompts.
 
-* [ ] Task 15: Implement Excel Sheet Linking (Run ID) (In Progress)
+* [ ] Task 15: Implement Excel Sheet Linking (Run ID) (Completed)
     * **Objective:** Link the "Run Summary" and "Detailed Extracted Data" sheets in the Excel output using a unique Run ID.
     * **Details:**
         * Generate a unique `run_id` (e.g., using `uuid.uuid4()`).
         * Add a "Run ID" column to both `SUMMARY_HEADERS` and `DETAIL_HEADERS`.
         * Modify `_write_to_excel` in `src/main.py` to include this `run_id` in every row written to both sheets.
-* [ ] Task 16: Save Raw JSON Output per Run
+* [ ] Task 16: Save Raw JSON Output per Run (In Progress)
     * **Objective:** Save the raw JSON response from the AI, along with run metadata, to a dedicated JSON file for each company processed.
     * **Details:**
         * Create a new subfolder `data/json_outputs/`.
         * Implement a helper function (e.g., `_save_raw_json_output`) to save the raw JSON data and associated metadata (company, model, prompt, run ID) to a `.json` file.
         * Call this function within `process_single_company`.
-* [ ] Task 17: Externalize & Version Prompt Templates
+* [ ] Task 17: Externalize & Version Prompt Templates (In Progress)
     * **Objective:** Move prompt templates from hardcoded strings into an external, versioned configuration file.
     * **Details:**
         * Create a `config/prompts.json` (or `prompts.yaml`) file to store multiple prompt templates, each with a version/name.
         * Modify `src/config_loader.py` to load these prompt templates.
         * Update `src/ai_models/*.py` to fetch the appropriate prompt template from the loaded configuration based on a selected prompt version/name.
         * **Refine the prompt content** within this file to focus on "all direct and indirect subsidiaries" as requested.
-* [ ] Task 18: Interactive Prompt Selection
+* [ ] Task 18: Interactive Prompt Selection (In Progress)
     * **Objective:** Allow the user to select a prompt version interactively via the CLI.
     * **Details:**
         * Update `.env.example` with a `DEFAULT_PROMPT_VERSION` setting.
         * Modify `src/main.py` to list available prompt versions (from `config/prompts.json`), highlight the default, and allow user selection (numbered choices).
         * Pass the selected prompt version to `process_single_company`.
+
 ---
 
 ## Requirements v1.0
