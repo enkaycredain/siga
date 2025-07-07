@@ -25,27 +25,25 @@ from src.ai_models.google_ai_model import GoogleAIModel
 from src.ai_models.ollama_model import OllamaModel
 from src.ai_models.base import AIBaseModel
 
+
 # --- Output Configuration ---
 OUTPUT_EXCEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'output.xlsx')
 OUTPUT_JSON_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'json_outputs')
 
-# Headers for the "Run Summary" sheet
+# Headers for the "Run Summary" sheet (Simplified for subsidiary focus)
 SUMMARY_HEADERS = [
     "Run ID",
-    "Company Name", "Date Time of Run", "AI Model Chosen", "Prompt Used",
-    "Error", "Subsidiaries Found Count", "Financial Metrics Found Count",
-    "News Items Found Count", "JSON Output File"
+    "Company Name", "Date Time of Run", "AI Model Chosen", "Prompt Version Used",
+    "Error", "Subsidiaries Found Count", "JSON Output File"
 ]
 
-# Headers for the "Detailed Extracted Data" sheet
+# Headers for the "Detailed Extracted Data" sheet (Simplified for subsidiary focus)
 DETAIL_HEADERS = [
     "Run ID",
-    "Company Name", "Subsidiary Name", "Subsidiary Location",
-    "Financial Metric", "Financial Value", "Financial As Of Date",
-    "News Headline", "News Date", "News Summary", "Data Type"
+    "Company Name", "Subsidiary Name", "Subsidiary Location", "Source of Details"
 ]
 
-def _write_to_excel(data: Dict, output_file_path: str, ai_model_chosen: str, prompt_used: str, error_message: str = None, run_id: str = None, json_output_file: str = None):
+def _write_to_excel(data: Dict, output_file_path: str, ai_model_chosen: str, prompt_version_used: str, error_message: str = None, run_id: str = None, json_output_file: str = None):
     """
     Appends extracted data to an Excel file with two sheets: "Run Summary" and "Detailed Extracted Data".
     Creates the file and sheets with headers if they don't exist.
@@ -83,27 +81,21 @@ def _write_to_excel(data: Dict, output_file_path: str, ai_model_chosen: str, pro
         current_datetime = datetime.now().isoformat()
 
         subsidiaries_count = len(data.get("subsidiaries", []))
-        financial_count = len(data.get("financial_info", []))
-        news_count = len(data.get("news_info", []))
-
+        
         summary_row_data = {
             "Run ID": run_id if run_id else str(uuid.uuid4()),
             "Company Name": company_name,
             "Date Time of Run": current_datetime,
             "AI Model Chosen": ai_model_chosen,
-            "Prompt Used": prompt_used,
+            "Prompt Version Used": prompt_version_used,
             "Error": error_message if error_message else "",
             "Subsidiaries Found Count": subsidiaries_count,
-            "Financial Metrics Found Count": financial_count,
-            "News Items Found Count": news_count,
             "JSON Output File": json_output_file if json_output_file else ""
         }
         summary_sheet.append([summary_row_data.get(header, "") for header in SUMMARY_HEADERS])
 
         if not error_message:
             subsidiaries = data.get("subsidiaries", [])
-            financial_info = data.get("financial_info", [])
-            news_info = data.get("news_info", [])
 
             for sub in subsidiaries:
                 detail_row = {
@@ -111,29 +103,7 @@ def _write_to_excel(data: Dict, output_file_path: str, ai_model_chosen: str, pro
                     "Company Name": company_name,
                     "Subsidiary Name": sub.get("name", ""),
                     "Subsidiary Location": sub.get("location", ""),
-                    "Data Type": "Subsidiary"
-                }
-                detail_sheet.append([detail_row.get(header, "") for header in DETAIL_HEADERS])
-
-            for fin in financial_info:
-                detail_row = {
-                    "Run ID": run_id if run_id else "",
-                    "Company Name": company_name,
-                    "Financial Metric": fin.get("metric", ""),
-                    "Financial Value": fin.get("value", ""),
-                    "Financial As Of Date": fin.get("as_of_date", ""),
-                    "Data Type": "Financial"
-                }
-                detail_sheet.append([detail_row.get(header, "") for header in DETAIL_HEADERS])
-
-            for news in news_info:
-                detail_row = {
-                    "Run ID": run_id if run_id else "",
-                    "Company Name": company_name,
-                    "News Headline": news.get("headline", ""),
-                    "News Date": news.get("date", ""),
-                    "News Summary": news.get("summary", ""),
-                    "Data Type": "News"
+                    "Source of Details": sub.get("source", "Not Available"),
                 }
                 detail_sheet.append([detail_row.get(header, "") for header in DETAIL_HEADERS])
         else:
@@ -166,7 +136,7 @@ def _write_to_excel(data: Dict, output_file_path: str, ai_model_chosen: str, pro
             except Exception as close_e:
                 app_logger.error(f"Error closing workbook after write error: {close_e}")
 
-def _save_raw_json_output(company_name: str, extracted_data: Dict, ai_model_chosen: str, prompt_used: str, run_id: str, output_dir: str = OUTPUT_JSON_DIR) -> str:
+def _save_raw_json_output(company_name: str, extracted_data: Dict, ai_model_chosen: str, prompt_version_used: str, run_id: str, output_dir: str = OUTPUT_JSON_DIR) -> str:
     """
     Saves the raw JSON output from the AI along with metadata to a JSON file.
 
@@ -174,7 +144,7 @@ def _save_raw_json_output(company_name: str, extracted_data: Dict, ai_model_chos
         company_name (str): The name of the company.
         extracted_data (Dict): The raw JSON data extracted by the AI.
         ai_model_chosen (str): The AI model used.
-        prompt_used (str): The prompt that was used.
+        prompt_version_used (str): The prompt version that was used.
         run_id (str): The unique ID for the current run.
         output_dir (str): Directory to save the JSON files.
 
@@ -193,7 +163,7 @@ def _save_raw_json_output(company_name: str, extracted_data: Dict, ai_model_chos
         "run_id": run_id,
         "company_name": company_name,
         "ai_model_chosen": ai_model_chosen,
-        "prompt_used": prompt_used,
+        "prompt_version_used": prompt_version_used,
         "timestamp": datetime.now().isoformat(),
         "extracted_data": extracted_data
     }
@@ -264,9 +234,9 @@ def process_single_company(company_name: str, ai_instance: AIBaseModel, model_na
             error_message = f"AI model returned an error for '{company_name}': {extracted_data['error']}"
             app_logger.error(error_message)
         
-        json_output_file_path = _save_raw_json_output(company_name, extracted_data, model_name, prompt_used_text, run_id)
+        json_output_file_path = _save_raw_json_output(company_name, extracted_data, model_name, prompt_version, run_id)
 
-    _write_to_excel(extracted_data, OUTPUT_EXCEL_PATH, model_name, prompt_used_text, error_message, run_id, json_output_file_path)
+    _write_to_excel(extracted_data, OUTPUT_EXCEL_PATH, model_name, prompt_version, error_message, run_id, json_output_file_path)
 
     if error_message:
         app_logger.warning(f"Skipping '{company_name}' due to error/timeout. Details logged to Excel and console.")
@@ -527,3 +497,9 @@ def main():
         app_logger.info("No company or CSV file specified. Use --company or --csv_file argument.")
 
     app_logger.info("SIGA application finished.")
+
+# --- DEBUG PRINT 6: Just before main() is called ---
+print("DEBUG: About to call main() function.")
+
+if __name__ == "__main__":
+    main()

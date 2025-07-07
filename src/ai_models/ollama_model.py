@@ -5,6 +5,7 @@ import requests
 import json
 import sys
 import os
+import re # Import regex module
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
@@ -99,9 +100,20 @@ class OllamaModel(AIBaseModel):
             response_data = self._make_api_request("/api/chat", method="POST", json_data=json_data, timeout=self.timeout_seconds)
             raw_content = response_data.get("message", {}).get("content", "")
             self.logger.debug(f"Ollama raw response: {raw_content}")
-            extracted_data = json.loads(raw_content)
-            self.logger.info(f"Successfully extracted info for '{company_name}' using Ollama.")
-            return extracted_data
+
+            # --- JSON Extraction Logic (NEW) ---
+            # Use regex to find the JSON block within markdown code fences
+            json_match = re.search(r'```json\n({.*?})\n```', raw_content, re.DOTALL)
+            
+            if json_match:
+                json_string = json_match.group(1)
+                extracted_data = json.loads(json_string)
+                self.logger.info(f"Successfully extracted info for '{company_name}' using Ollama.")
+                return extracted_data
+            else:
+                self.logger.error(f"No JSON block found in Ollama response for {company_name}. Raw content: {raw_content[:500]}...")
+                return {"error": "No JSON block found in AI response."}
+
         except (ConnectionError, TimeoutError, RuntimeError) as e:
             self.logger.error(f"Ollama API communication error for {company_name} with model {model_name}: {e}")
             return {"error": f"Ollama API communication error: {e}"}
