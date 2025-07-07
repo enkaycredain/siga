@@ -139,36 +139,6 @@ This phase focuses on improving SIYA's output formats and introducing a flexible
         * Pass the selected prompt version to `process_single_company`.
 ---
 
-## Phase 3: Batch Processing & Robustness
-
-This phase focuses on enabling SIYA to process multiple companies from a CSV file, manage workload, and implement robust failure recovery.
-
-* [ ] Task 12: CSV Input Processing (In Progress)
-    * **Objective:** Read company names from a CSV file and prepare them for processing.
-    * **Details:**
-        * Create a new utility file (`src/utils.py`) to contain helper functions.
-        * Implement a function `read_companies_from_csv(file_path: str) -> List[str]` in `src/utils.py` to read a list of company names from the first column of a CSV file.
-        * Integrate this function into `src/main.py` when `--csv_file` argument is provided, to get the list of companies.
-        * Add `pandas` to `environment.yml` for robust CSV reading.
-* [ ] Task 13: Progress Tracking & Failure Recovery
-    * **Objective:** Implement a mechanism to track completed companies and resume processing from the last failed point.
-    * **Details:**
-        * Implement a simple persistence mechanism (e.g., a small JSON file in `data/` or a dedicated `progress.json`) to store the list of successfully processed companies.
-        * Before processing a company, check if it's already in the "completed" list. If so, skip it.
-        * After a successful company processing, add its name to the "completed" list and save the progress.
-        * Ensure this mechanism is robust to application restarts.
-* [ ] Task 14: Workload Management (Rate Limiting for Batch)
-    * **Objective:** Ensure the agent manages the workload and respects the 1-minute per company research constraint when processing multiple companies.
-    * **Details:**
-        * While the `process_single_company` already has a timeout, for batch processing, we need to ensure calls are spaced out if necessary (though the 1-minute timeout per call inherently provides some spacing).
-        * This task will primarily involve just sequential processing without explicit delays between companies, as the timeout handles the minimum duration. We will verify this.
-
-## Logging
-
-SIYA provides comprehensive logging at `INFO`, `DEBUG` (for TRACE), `WARNING`, and `ERROR` levels to both the console and optional log files. Logs are timestamped and provide clear insights into agent operations.
-
----
-
 ## Requirements v1.0
 
 This section outlines the detailed functional and non-functional requirements for the Subsidiary Intelligence Yielding Analyst (SIYA) solution.
