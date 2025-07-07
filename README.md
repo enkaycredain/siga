@@ -68,15 +68,15 @@ To set up your development environment and install dependencies, please refer to
         * Implement a basic `extract_company_info()` (prompt engineering can be refined later).
         * Add `requests` (and/or `ollama`) library to `environment.yml`.
 * [x] Task 11: Core Agent Orchestration (Single Company Processing) (Completed)
-    * **Objective:** Build the main agent logic to process a single company using the selected AI model, handle timeouts, and save output to CSV.
+    * **Objective:** Build the main agent logic to process a single company using the selected AI model, handle timeouts, and save output to **Excel (two sheets)**.
     * **Details:**
         * Update `src/main.py`.
         * Instantiate the chosen AI model.
         * Implement a `process_company` function that calls `ai_instance.extract_company_info`.
         * Implement the 1-minute timeout for AI calls.
-        * Implement CSV output logic:
-            * Ensure the output CSV file (`output.csv` in `data/`) is created if it doesn't exist, with a header.
-            * Append each company's extracted data (flattened) along with `Date Time of Run`, `AI Model Chosen`, and `Prompt Used` to the CSV.
+        * Implement **Excel output logic using `openpyxl`**:
+            * Ensure the output Excel file (`output.xlsx` in `data/`) is created if it doesn't exist.
+            * Append data to two sheets: "Run Summary" and "Detailed Extracted Data", with appropriate headers.
         * Handle errors by logging and skipping the company, as per requirements.
 
 ---
@@ -118,15 +118,20 @@ This section outlines the detailed functional and non-functional requirements fo
 * **Core Functionality:**
     * Agent extracts subsidiary lists, locations, and other related information (news, financial data) for companies.
     * Input: Single company name or CSV file with a list of companies.
-    * Output: Tabular format, **always appended to a CSV file**.
+    * Output: **Excel file with two sheets: "Run Summary" and "Detailed Extracted Data".**
 * **Data Source & Hallucination Mitigation:**
     * Agent **only** uses the **AI's pre-trained knowledge/training data**.
     * **No external search** (web scraping, real-time lookups) is permitted.
     * Information will be presented "as of" the AI's training data, with a date tag in the output.
     * **AI prompts will be engineered to be precise and sharp to minimize hallucination.**
-* **Output Table Format (CSV):**
-    * `Company Name | Subsidiary Name | Subsidiary Location | Field Name 1 | Field Info 1 | Field Info 1 as of [Date] | Field Name N | Field Info N | Field Info N as of [Date] | Date Time of Run | AI Model Chosen | Prompt Used`
-    * The output will be **appended** to an existing CSV file (or create a new one if it doesn't exist).
+* **Output Table Format (Excel - Two Sheets):**
+    * **Sheet 1: "Run Summary"**
+        * **Purpose:** Provides a high-level overview of each company processed, including the run metadata. Each row here represents a unique company processed in a given run.
+        * **Columns:** `Company Name`, `Date Time of Run`, `AI Model Chosen`, `Prompt Used`, `Error` (if overall processing failed), `Subsidiaries Found Count`, `Financial Metrics Found Count`, `News Items Found Count`.
+    * **Sheet 2: "Detailed Extracted Data"**
+        * **Purpose:** Contains the flattened, granular details (subsidiaries, financial metrics, news items). Each row here corresponds to a single subsidiary, financial metric, or news item.
+        * **Columns:** `Company Name` (to link back to the summary), `Subsidiary Name`, `Subsidiary Location`, `Financial Metric`, `Financial Value`, `Financial As Of Date`, `News Headline`, `News Date`, `News Summary`, `Data Type` (e.g., "Subsidiary", "Financial", "News").
+    * The output will be **appended** to existing sheets in the Excel file (or create new sheets/file if they don't exist).
 * **AI Model Configuration & Selection:**
     * **Support for configuring multiple AI models** (e.g., Google AI, Oobabooga/Ollama, OpenAI).
     * Configuration for **each** AI model (e.g., API keys, model names, base URLs, specific parameters) will be stored in a `.env` file.
