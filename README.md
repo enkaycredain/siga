@@ -68,7 +68,7 @@ To set up your development environment and install dependencies, please refer to
         * Implement a basic `extract_company_info()` (prompt engineering can be refined later).
         * Add `requests` (and/or `ollama`) library to `environment.yml`.
 * [x] Task 11: Core Agent Orchestration (Single Company Processing) (Completed)
-    * **Objective:** Build the main agent logic to process a single company using the selected AI model, handle timeouts, and save output to **Excel (two sheets)**.
+    * **Objective:** Build the main agent logic to process a single company using the selected AI model, handle timeouts, and save output to **Excel (two sheets, linked by Run ID)**.
     * **Details:**
         * Update `src/main.py`.
         * Instantiate the chosen AI model.
@@ -77,8 +77,66 @@ To set up your development environment and install dependencies, please refer to
         * Implement **Excel output logic using `openpyxl`**:
             * Ensure the output Excel file (`output.xlsx` in `data/`) is created if it doesn't exist.
             * Append data to two sheets: "Run Summary" and "Detailed Extracted Data", with appropriate headers.
+            * **Add a unique `Run ID` to link entries between the two sheets.**
         * Handle errors by logging and skipping the company, as per requirements.
 
+---
+
+## Phase 3: Batch Processing & Robustness
+
+This phase focuses on enabling SIYA to process multiple companies from a CSV file, manage workload, and implement robust failure recovery.
+
+* [x] Task 12: CSV Input Processing (Completed)
+    * **Objective:** Read company names from a CSV file and prepare them for processing.
+    * **Details:**
+        * Create a new utility file (`src/utils.py`) to contain helper functions.
+        * Implement a function `read_companies_from_csv(file_path: str) -> List[str]` in `src/utils.py` to read a list of company names from the first column of a CSV file.
+        * Integrate this function into `src/main.py` when `--csv_file` argument is provided, to get the list of companies.
+        * Add `pandas` to `environment.yml` for robust CSV reading.
+* [ ] Task 13: Progress Tracking & Failure Recovery
+    * **Objective:** Implement a mechanism to track completed companies and resume processing from the last failed point.
+    * **Details:**
+        * Implement a simple persistence mechanism (e.g., a small JSON file in `data/` or a dedicated `progress.json`) to store the list of successfully processed companies.
+        * Before processing a company, check if it's already in the "completed" list. If so, skip it.
+        * After a successful company processing, add its name to the "completed" list and save the progress.
+        * Ensure this mechanism is robust to application restarts.
+* [ ] Task 14: Workload Management (Rate Limiting for Batch)
+    * **Objective:** Ensure the agent manages the workload and respects the 1-minute per company research constraint when processing multiple companies.
+    * **Details:**
+        * While the `process_single_company` already has a timeout, for batch processing, we need to ensure calls are spaced out if necessary (though the 1-minute timeout per call inherently provides some spacing).
+        * This task will primarily involve just sequential processing without explicit delays between companies, as the timeout handles the minimum duration. We will verify this.
+
+---
+
+## Phase 4: Enhanced Output & Prompt Management
+
+This phase focuses on improving SIYA's output formats and introducing a flexible system for managing AI prompts.
+
+* [ ] Task 15: Implement Excel Sheet Linking (Run ID) (In Progress)
+    * **Objective:** Link the "Run Summary" and "Detailed Extracted Data" sheets in the Excel output using a unique Run ID.
+    * **Details:**
+        * Generate a unique `run_id` (e.g., using `uuid.uuid4()`).
+        * Add a "Run ID" column to both `SUMMARY_HEADERS` and `DETAIL_HEADERS`.
+        * Modify `_write_to_excel` in `src/main.py` to include this `run_id` in every row written to both sheets.
+* [ ] Task 16: Save Raw JSON Output per Run
+    * **Objective:** Save the raw JSON response from the AI, along with run metadata, to a dedicated JSON file for each company processed.
+    * **Details:**
+        * Create a new subfolder `data/json_outputs/`.
+        * Implement a helper function (e.g., `_save_raw_json_output`) to save the raw JSON data and associated metadata (company, model, prompt, run ID) to a `.json` file.
+        * Call this function within `process_single_company`.
+* [ ] Task 17: Externalize & Version Prompt Templates
+    * **Objective:** Move prompt templates from hardcoded strings into an external, versioned configuration file.
+    * **Details:**
+        * Create a `config/prompts.json` (or `prompts.yaml`) file to store multiple prompt templates, each with a version/name.
+        * Modify `src/config_loader.py` to load these prompt templates.
+        * Update `src/ai_models/*.py` to fetch the appropriate prompt template from the loaded configuration based on a selected prompt version/name.
+        * **Refine the prompt content** within this file to focus on "all direct and indirect subsidiaries" as requested.
+* [ ] Task 18: Interactive Prompt Selection
+    * **Objective:** Allow the user to select a prompt version interactively via the CLI.
+    * **Details:**
+        * Update `.env.example` with a `DEFAULT_PROMPT_VERSION` setting.
+        * Modify `src/main.py` to list available prompt versions (from `config/prompts.json`), highlight the default, and allow user selection (numbered choices).
+        * Pass the selected prompt version to `process_single_company`.
 ---
 
 ## Phase 3: Batch Processing & Robustness
