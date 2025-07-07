@@ -85,11 +85,12 @@ To set up your development environment and install dependencies, please refer to
 
 This phase focuses on enabling SIYA to process multiple companies from a CSV file, manage workload, and implement robust failure recovery.
 
-* [ ] Task 12: CSV Input Processing
+* [ ] Task 12: CSV Input Processing (In Progress)
     * **Objective:** Read company names from a CSV file and prepare them for processing.
     * **Details:**
-        * Create a new utility function (e.g., in `src/utils.py`) to read a list of company names from a CSV file.
-        * Integrate this function into `src/main.py` when `--csv_file` argument is provided.
+        * Create a new utility file (`src/utils.py`) to contain helper functions.
+        * Implement a function `read_companies_from_csv(file_path: str) -> List[str]` in `src/utils.py` to read a list of company names from the first column of a CSV file.
+        * Integrate this function into `src/main.py` when `--csv_file` argument is provided, to get the list of companies.
         * Add `pandas` to `environment.yml` for robust CSV reading.
 * [ ] Task 13: Progress Tracking & Failure Recovery
     * **Objective:** Implement a mechanism to track completed companies and resume processing from the last failed point.
@@ -102,7 +103,7 @@ This phase focuses on enabling SIYA to process multiple companies from a CSV fil
     * **Objective:** Ensure the agent manages the workload and respects the 1-minute per company research constraint when processing multiple companies.
     * **Details:**
         * While the `process_single_company` already has a timeout, for batch processing, we need to ensure calls are spaced out if necessary (though the 1-minute timeout per call inherently provides some spacing).
-        * This task will primarily involve ensuring the loop over companies in `main.py` respects the overall rate limit. Given the 1-minute timeout per company, this might mostly involve just sequential processing without explicit delays between companies, as the timeout handles the minimum duration. We will verify this.
+        * This task will primarily involve just sequential processing without explicit delays between companies, as the timeout handles the minimum duration. We will verify this.
 
 ## Logging
 
