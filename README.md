@@ -67,7 +67,7 @@ To set up your development environment and install dependencies, please refer to
         * Implement `list_available_models()` using Ollama's API (requires `requests` or `ollama` client).
         * Implement a basic `extract_company_info()` (prompt engineering can be refined later).
         * Add `requests` (and/or `ollama`) library to `environment.yml`.
-* [ ] Task 11: Core Agent Orchestration (Single Company Processing) (In Progress)
+* [x] Task 11: Core Agent Orchestration (Single Company Processing) (Completed)
     * **Objective:** Build the main agent logic to process a single company using the selected AI model, handle timeouts, and save output to CSV.
     * **Details:**
         * Update `src/main.py`.
@@ -78,7 +78,31 @@ To set up your development environment and install dependencies, please refer to
             * Ensure the output CSV file (`output.csv` in `data/`) is created if it doesn't exist, with a header.
             * Append each company's extracted data (flattened) along with `Date Time of Run`, `AI Model Chosen`, and `Prompt Used` to the CSV.
         * Handle errors by logging and skipping the company, as per requirements.
+
 ---
+
+## Phase 3: Batch Processing & Robustness
+
+This phase focuses on enabling SIYA to process multiple companies from a CSV file, manage workload, and implement robust failure recovery.
+
+* [ ] Task 12: CSV Input Processing
+    * **Objective:** Read company names from a CSV file and prepare them for processing.
+    * **Details:**
+        * Create a new utility function (e.g., in `src/utils.py`) to read a list of company names from a CSV file.
+        * Integrate this function into `src/main.py` when `--csv_file` argument is provided.
+        * Add `pandas` to `environment.yml` for robust CSV reading.
+* [ ] Task 13: Progress Tracking & Failure Recovery
+    * **Objective:** Implement a mechanism to track completed companies and resume processing from the last failed point.
+    * **Details:**
+        * Implement a simple persistence mechanism (e.g., a small JSON file in `data/` or a dedicated `progress.json`) to store the list of successfully processed companies.
+        * Before processing a company, check if it's already in the "completed" list. If so, skip it.
+        * After a successful company processing, add its name to the "completed" list and save the progress.
+        * Ensure this mechanism is robust to application restarts.
+* [ ] Task 14: Workload Management (Rate Limiting for Batch)
+    * **Objective:** Ensure the agent manages the workload and respects the 1-minute per company research constraint when processing multiple companies.
+    * **Details:**
+        * While the `process_single_company` already has a timeout, for batch processing, we need to ensure calls are spaced out if necessary (though the 1-minute timeout per call inherently provides some spacing).
+        * This task will primarily involve ensuring the loop over companies in `main.py` respects the overall rate limit. Given the 1-minute timeout per company, this might mostly involve just sequential processing without explicit delays between companies, as the timeout handles the minimum duration. We will verify this.
 
 ## Logging
 
