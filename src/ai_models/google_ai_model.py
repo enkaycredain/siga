@@ -17,8 +17,8 @@ class GoogleAIModel(AIBaseModel):
     def __init__(self, config: Dict):
         super().__init__(config)
         self.api_key = self.config.get("GOOGLE_API_KEY")
-        self.preferred_model = self.config.get("GOOGLE_PREFERRED_MODEL", "gemini-pro") # Default if not in config
-        self.timeout_seconds = self.config.get("COMPANY_RESEARCH_TIMEOUT_SECONDS", 60) # Use configured timeout
+        self.preferred_model = self.config.get("GOOGLE_PREFERRED_MODEL", "gemini-pro")
+        self.timeout_seconds = self.config.get("COMPANY_RESEARCH_TIMEOUT_SECONDS", 60)
 
         if not self.api_key:
             self.logger.error("Google AI API key not found in configuration. Google AI models cannot be used.")
@@ -46,7 +46,7 @@ class GoogleAIModel(AIBaseModel):
                 self.logger.error(f"An unexpected error occurred while listing Google AI models: {e}")
         return sorted(list(set(available_model_ids)))
 
-    def extract_company_info(self, company_name: str, model_name: str, user_template: str, system_message: str) -> Dict: # Updated signature
+    def extract_company_info(self, company_name: str, model_name: str, user_template: str, system_message: str) -> Dict:
         """
         Extracts company and subsidiary information using the specified Google AI model.
         This uses the provided prompt template and relies on the AI's internal knowledge.
@@ -64,11 +64,10 @@ class GoogleAIModel(AIBaseModel):
         try:
             model = genai.GenerativeModel(model_name)
             
-            # Replace the placeholder in the user_template with the actual company name
             user_prompt_content = user_template.replace("[COMPANY_PLACEHOLDER]", company_name)
 
             response = model.generate_content(
-                user_prompt_content, # Use the prepared user_prompt_content
+                user_prompt_content,
                 generation_config=genai.types.GenerationConfig(
                     temperature=0.1,
                     candidate_count=1,
@@ -122,7 +121,6 @@ if __name__ == "__main__":
             if model_to_use not in models:
                 test_logger.warning(f"Preferred model '{preferred}' not found. 'gemini-pro' also not found. Cannot test extraction.")
             else:
-                # Use prompt data from config for testing
                 test_prompt_data = config["PROMPT_TEMPLATES"].get(
                     config["DEFAULT_PROMPT_VERSION"], {}
                 )

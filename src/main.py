@@ -11,9 +11,9 @@ from typing import Dict, List
 from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
 import uuid
-import json # Added for raw JSON output saving
+import json
 
-# Add the parent directory (siya/) to the Python path
+# Add the parent directory (siga/) to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from src.config_loader import load_config
@@ -35,7 +35,7 @@ SUMMARY_HEADERS = [
     "Run ID",
     "Company Name", "Date Time of Run", "AI Model Chosen", "Prompt Used",
     "Error", "Subsidiaries Found Count", "Financial Metrics Found Count",
-    "News Items Found Count", "JSON Output File" # Added JSON Output File column
+    "News Items Found Count", "JSON Output File"
 ]
 
 # Headers for the "Detailed Extracted Data" sheet
@@ -51,9 +51,8 @@ def _write_to_excel(data: Dict, output_file_path: str, ai_model_chosen: str, pro
     Appends extracted data to an Excel file with two sheets: "Run Summary" and "Detailed Extracted Data".
     Creates the file and sheets with headers if they don't exist.
     """
-    siya_logger = logging.getLogger('siya_agent') # Get logger within function scope
+    app_logger = logging.getLogger('siga.app')
 
-    # Ensure the data directory exists
     output_dir = os.path.dirname(output_file_path)
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -98,7 +97,7 @@ def _write_to_excel(data: Dict, output_file_path: str, ai_model_chosen: str, pro
             "Subsidiaries Found Count": subsidiaries_count,
             "Financial Metrics Found Count": financial_count,
             "News Items Found Count": news_count,
-            "JSON Output File": json_output_file if json_output_file else "" # Add JSON output file path
+            "JSON Output File": json_output_file if json_output_file else ""
         }
         summary_sheet.append([summary_row_data.get(header, "") for header in SUMMARY_HEADERS])
 
@@ -139,7 +138,7 @@ def _write_to_excel(data: Dict, output_file_path: str, ai_model_chosen: str, pro
                 }
                 detail_sheet.append([detail_row.get(header, "") for header in DETAIL_HEADERS])
         else:
-            siya_logger.warning(f"No detailed data written for '{company_name}' due to processing error.")
+            app_logger.warning(f"No detailed data written for '{company_name}' due to processing error.")
 
         for sheet in [summary_sheet, detail_sheet]:
             for col in sheet.columns:
@@ -158,15 +157,15 @@ def _write_to_excel(data: Dict, output_file_path: str, ai_model_chosen: str, pro
                 sheet.column_dimensions[get_column_letter(column)].width = adjusted_width
 
         workbook.save(output_file_path)
-        siya_logger.info(f"Data for '{company_name}' saved to '{output_file_path}'.")
+        app_logger.info(f"Data for '{company_name}' saved to '{output_file_path}'.")
 
     except Exception as e:
-        siya_logger.error(f"Error writing to Excel file '{output_file_path}': {e}")
+        app_logger.error(f"Error writing to Excel file '{output_file_path}': {e}")
         if workbook:
             try:
                 workbook.close()
             except Exception as close_e:
-                siya_logger.error(f"Error closing workbook after write error: {close_e}")
+                app_logger.error(f"Error closing workbook after write error: {close_e}")
 
 def _save_raw_json_output(company_name: str, extracted_data: Dict, ai_model_chosen: str, prompt_used: str, run_id: str, output_dir: str = OUTPUT_JSON_DIR) -> str:
     """
@@ -183,11 +182,10 @@ def _save_raw_json_output(company_name: str, extracted_data: Dict, ai_model_chos
     Returns:
         str: The path to the saved JSON file, or None if saving failed.
     """
-    siya_logger = logging.getLogger('siya_agent')
+    app_logger = logging.getLogger('siga.app')
     os.makedirs(output_dir, exist_ok=True)
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    # Sanitize company name for filename
     sanitized_company_name = "".join(c for c in company_name if c.isalnum() or c in (' ', '.', '_')).rstrip().replace(' ', '_')
     filename = f"{sanitized_company_name}_{run_id}_{timestamp}.json"
     file_path = os.path.join(output_dir, filename)
@@ -204,17 +202,16 @@ def _save_raw_json_output(company_name: str, extracted_data: Dict, ai_model_chos
     try:
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(json_output_content, f, indent=4, ensure_ascii=False)
-        siya_logger.info(f"Raw JSON output saved to: {file_path}")
+        app_logger.info(f"Raw JSON output saved to: {file_path}")
         return file_path
     except Exception as e:
-        siya_logger.error(f"Error saving raw JSON output for '{company_name}' to '{file_path}': {e}")
+        app_logger.error(f"Error saving raw JSON output for '{company_name}' to '{file_path}': {e}")
         return None
 
 
 def _run_extraction_in_thread(ai_instance, company_name, model_name, prompt_data, result_container):
     """Helper function to run extraction in a separate thread."""
     try:
-        # Pass the prompt_data (containing user_template and system_message) to the AI instance's extract_company_info
         extracted_data = ai_instance.extract_company_info(
             company_name,
             model_name,
@@ -227,30 +224,27 @@ def _run_extraction_in_thread(ai_instance, company_name, model_name, prompt_data
     finally:
         result_container['completed'] = True
 
-def process_single_company(company_name: str, ai_instance: AIBaseModel, model_name: str, config: Dict, siya_logger: logging.Logger, run_id: str, prompt_version: str):
+def process_single_company(company_name: str, ai_instance: AIBaseModel, model_name: str, config: Dict, app_logger: logging.Logger, run_id: str, prompt_version: str):
     """
     Processes a single company by calling the AI model and handling timeouts.
     Saves the extracted data (or error) to an Excel file and raw JSON file.
     """
-    siya_logger.info(f"Processing company: '{company_name}' with model '{model_name}' using prompt version '{prompt_version}'...")
+    app_logger.info(f"Processing company: '{company_name}' with model '{model_name}' using prompt version '{prompt_version}'...")
     extracted_data = {}
     error_message = None
     
-    # Get the specific prompt data for the chosen version
     prompt_data = config["PROMPT_TEMPLATES"].get(prompt_version)
     if not prompt_data:
         error_message = f"Prompt version '{prompt_version}' not found in prompts.json. Skipping company."
-        siya_logger.error(error_message)
-        _write_to_excel({"company_name": company_name}, OUTPUT_EXCEL_PATH, model_name, prompt_version, error_message, run_id, None) # Pass None for json_output_file
+        app_logger.error(error_message)
+        _write_to_excel({"company_name": company_name}, OUTPUT_EXCEL_PATH, model_name, prompt_version, error_message, run_id, None)
         return
 
-    # The prompt_used for logging and Excel summary will be the user_template content
     prompt_used_text = prompt_data.get("user_template", "").replace("[COMPANY_PLACEHOLDER]", company_name)
     
     result_container = {'data': {}, 'error': None, 'completed': False}
     timeout_seconds = config.get("COMPANY_RESEARCH_TIMEOUT_SECONDS", 60)
 
-    # Pass the prompt_data dictionary to the thread for extraction
     thread = threading.Thread(target=_run_extraction_in_thread, args=(ai_instance, company_name, model_name, prompt_data, result_container))
     thread.start()
     thread.join(timeout=timeout_seconds)
@@ -259,42 +253,42 @@ def process_single_company(company_name: str, ai_instance: AIBaseModel, model_na
 
     if not result_container['completed']:
         error_message = f"Processing for '{company_name}' timed out after {timeout_seconds} seconds."
-        siya_logger.error(error_message)
+        app_logger.error(error_message)
         extracted_data = {"company_name": company_name}
     elif result_container['error']:
         error_message = f"Error during AI extraction for '{company_name}': {result_container['error']}"
-        siya_logger.error(error_message)
+        app_logger.error(error_message)
         extracted_data = {"company_name": company_name}
     else:
         extracted_data = result_container['data']
         if "error" in extracted_data:
             error_message = f"AI model returned an error for '{company_name}': {extracted_data['error']}"
-            siya_logger.error(error_message)
+            app_logger.error(error_message)
         
         json_output_file_path = _save_raw_json_output(company_name, extracted_data, model_name, prompt_used_text, run_id)
 
     _write_to_excel(extracted_data, OUTPUT_EXCEL_PATH, model_name, prompt_used_text, error_message, run_id, json_output_file_path)
 
     if error_message:
-        siya_logger.warning(f"Skipping '{company_name}' due to error/timeout. Details logged to Excel and console.")
+        app_logger.warning(f"Skipping '{company_name}' due to error/timeout. Details logged to Excel and console.")
     else:
-        siya_logger.info(f"Successfully processed '{company_name}'. Data saved to '{OUTPUT_EXCEL_PATH}' and raw JSON to '{json_output_file_path}'.")
+        app_logger.info(f"Successfully processed '{company_name}'. Data saved to '{OUTPUT_EXCEL_PATH}' and raw JSON to '{json_output_file_path}'.")
 
 
 def main():
     """
-    Main entry point for the SIYA agent application.
+    Main entry point for the SIGA application.
     Handles configuration loading, logging setup, and CLI argument parsing.
     Orchestrates interactive AI provider and model selection, and company processing.
     """
     config = load_config()
-    siya_logger = setup_logging(log_level=config.get("LOG_LEVEL", "INFO"))
+    app_logger = setup_logging(log_level=config.get("LOG_LEVEL", "INFO"))
 
-    siya_logger.info("SIYA Agent started.")
-    siya_logger.debug(f"Loaded configuration: {config}")
+    app_logger.info("SIGA application started.")
+    app_logger.debug(f"Loaded configuration: {config}")
 
     parser = argparse.ArgumentParser(
-        description="Subsidiary Intelligence Yielding Analyst (SIYA) Agent."
+        description="Subsidiary Intelligence Gathering Agent (SIGA)."
     )
     parser.add_argument(
         "--company",
@@ -324,7 +318,7 @@ def main():
         action="store_true",
         help="Run in interactive mode, prompting for choices."
     )
-    parser.add_argument( # New argument for prompt version
+    parser.add_argument(
         "--prompt_version",
         type=str,
         help="Specific prompt version to use (e.g., 'subsidiary_research_v1'). "
@@ -335,13 +329,13 @@ def main():
     args = parser.parse_args()
 
     current_run_id = str(uuid.uuid4())
-    siya_logger.info(f"Starting new run with ID: {current_run_id}")
+    app_logger.info(f"Starting new run with ID: {current_run_id}")
 
     ai_instance = None
     selected_prompt_version = None
     
     if args.interactive:
-        siya_logger.info("Running in interactive mode.")
+        app_logger.info("Running in interactive mode.")
         chosen_provider = None
 
         available_providers = ["openai", "google_ai", "ollama"]
@@ -352,7 +346,7 @@ def main():
         }
         preferred_provider = available_providers[0]
 
-        siya_logger.info("\n--- Choose an AI Provider ---")
+        app_logger.info("\n--- Choose an AI Provider ---")
         for i, provider in enumerate(available_providers):
             display_name = provider_display_names.get(provider, provider)
             highlight_marker = " *" if provider == preferred_provider else ""
@@ -370,11 +364,11 @@ def main():
                     print("Invalid choice. Please enter a number from the list or press Enter for default.")
             except Exception as e:
                 print(f"An error occurred during selection: {e}")
-                siya_logger.error(f"Error during provider selection: {e}")
+                app_logger.error(f"Error during provider selection: {e}")
                 return
 
         args.provider = chosen_provider
-        siya_logger.info(f"Selected AI Provider: {args.provider}")
+        app_logger.info(f"Selected AI Provider: {args.provider}")
 
         try:
             if args.provider == "openai":
@@ -384,21 +378,21 @@ def main():
             elif args.provider == "ollama":
                 ai_instance = OllamaModel(config)
             else:
-                siya_logger.error(f"AI provider '{args.provider}' is not yet implemented or recognized.")
+                app_logger.error(f"AI provider '{args.provider}' is not yet implemented or recognized.")
                 return
 
             if ai_instance:
                 available_models = ai_instance.list_available_models()
                 if not available_models:
-                    siya_logger.error(f"No models found for {args.provider}. Check API key/base URL and connection.")
+                    app_logger.error(f"No models found for {args.provider}. Check API key/base URL and connection.")
                     return
 
                 preferred_model = ai_instance.get_preferred_model()
                 if preferred_model not in available_models:
-                    siya_logger.warning(f"Preferred model '{preferred_model}' not found among available models. Falling back to first available.")
+                    app_logger.warning(f"Preferred model '{preferred_model}' not found among available models. Falling back to first available.")
                     preferred_model = available_models[0]
 
-                siya_logger.info(f"\n--- Choose a Model for {args.provider} ---")
+                app_logger.info(f"\n--- Choose a Model for {args.provider} ---")
                 for i, model in enumerate(available_models):
                     highlight_marker = " *" if model == preferred_model else ""
                     print(f"{i+1}. {model}{highlight_marker}")
@@ -416,33 +410,33 @@ def main():
                             print("Invalid choice. Please enter a number from the list or press Enter for default.")
                     except Exception as e:
                         print(f"An error occurred during model selection: {e}")
-                        siya_logger.error(f"Error during model selection: {e}")
+                        app_logger.error(f"Error during model selection: {e}")
                         return
 
                 args.model = chosen_model
-                siya_logger.info(f"Selected AI Model: {args.model}")
+                app_logger.info(f"Selected AI Model: {args.model}")
 
         except ValueError as e:
-            siya_logger.error(f"Configuration error for {args.provider}: {e}")
+            app_logger.error(f"Configuration error for {args.provider}: {e}")
             return
         except ConnectionError as e:
-            siya_logger.error(f"Connection error for {args.provider}: {e}. Is the server running?")
+            app_logger.error(f"Connection error for {args.provider}: {e}. Is the server running?")
             return
         except Exception as e:
-            siya_logger.error(f"Failed to initialize AI instance for {args.provider}: {e}")
+            app_logger.error(f"Failed to initialize AI instance for {args.provider}: {e}")
             return
         
         available_prompts = list(config["PROMPT_TEMPLATES"].keys())
         if not available_prompts:
-            siya_logger.error("No prompt templates found in config/prompts.json. Exiting.")
+            app_logger.error("No prompt templates found in config/prompts.json. Exiting.")
             return
 
         preferred_prompt_version = config.get("DEFAULT_PROMPT_VERSION", available_prompts[0])
         if preferred_prompt_version not in available_prompts:
-            siya_logger.warning(f"Default prompt version '{preferred_prompt_version}' not found. Falling back to first available: {available_prompts[0]}.")
+            app_logger.warning(f"Default prompt version '{preferred_prompt_version}' not found. Falling back to first available: {available_prompts[0]}.")
             preferred_prompt_version = available_prompts[0]
 
-        siya_logger.info("\n--- Choose a Prompt Template ---")
+        app_logger.info("\n--- Choose a Prompt Template ---")
         for i, prompt_v in enumerate(available_prompts):
             description = config["PROMPT_TEMPLATES"].get(prompt_v, {}).get("description", "No description available.")
             highlight_marker = " *" if prompt_v == preferred_prompt_version else ""
@@ -461,7 +455,7 @@ def main():
                     print("Invalid choice. Please enter a number from the list or press Enter for default.")
             except Exception as e:
                 print(f"An error occurred during prompt selection: {e}")
-                siya_logger.error(f"Error during prompt selection: {e}")
+                app_logger.error(f"Error during prompt selection: {e}")
                 return
         
         selected_prompt_version = chosen_prompt_version
@@ -470,25 +464,25 @@ def main():
     # --- Non-Interactive Mode Logic ---
     else: # Non-interactive mode
         if not args.provider:
-            siya_logger.error("Provider must be specified in non-interactive mode. Exiting.")
+            app_logger.error("Provider must be specified in non-interactive mode. Exiting.")
             return
         if not args.model:
-            siya_logger.error("Model must be specified in non-interactive mode if not interactive. Exiting.")
+            app_logger.error("Model must be specified in non-interactive mode if not interactive. Exiting.")
             return
         
         # Determine prompt version for non-interactive mode
         if args.prompt_version:
             selected_prompt_version = args.prompt_version
             if selected_prompt_version not in config["PROMPT_TEMPLATES"]:
-                siya_logger.error(f"Specified prompt version '{selected_prompt_version}' not found in prompts.json. Exiting.")
+                app_logger.error(f"Specified prompt version '{selected_prompt_version}' not found in prompts.json. Exiting.")
                 return
         else:
             selected_prompt_version = config.get("DEFAULT_PROMPT_VERSION")
             if not selected_prompt_version or selected_prompt_version not in config["PROMPT_TEMPLATES"]:
-                siya_logger.error(f"No prompt version specified and DEFAULT_PROMPT_VERSION is not set or found. Exiting.")
+                app_logger.error(f"No prompt version specified and DEFAULT_PROMPT_VERSION is not set or found. Exiting.")
                 return
         
-        siya_logger.info(f"Running non-interactive with Provider: {args.provider}, Model: {args.model}, Prompt: {selected_prompt_version}")
+        app_logger.info(f"Running non-interactive with Provider: {args.provider}, Model: {args.model}, Prompt: {selected_prompt_version}")
 
         try:
             if args.provider == "openai":
@@ -498,42 +492,39 @@ def main():
             elif args.provider == "ollama":
                 ai_instance = OllamaModel(config)
             else:
-                siya_logger.error(f"AI provider '{args.provider}' is not yet implemented or recognized for non-interactive mode.")
+                app_logger.error(f"AI provider '{args.provider}' is not yet implemented or recognized for non-interactive mode.")
                 return
         except ValueError as e:
-            siya_logger.error(f"Configuration error for {args.provider} in non-interactive mode: {e}")
+            app_logger.error(f"Configuration error for {args.provider} in non-interactive mode: {e}")
             return
         except ConnectionError as e:
-            siya_logger.error(f"Connection error for {args.provider} in non-interactive mode: {e}. Is the server running?")
+            app_logger.error(f"Connection error for {args.provider} in non-interactive mode: {e}. Is the server running?")
             return
         except Exception as e:
-            siya_logger.error(f"Failed to initialize AI instance for {args.provider} in non-interactive mode: {e}")
+            app_logger.error(f"Failed to initialize AI instance for {args.provider} in non-interactive mode: {e}")
             return
 
     # Ensure a prompt version is selected before proceeding
     if not selected_prompt_version:
-        siya_logger.error("No prompt version selected. Exiting.")
+        app_logger.error("No prompt version selected. Exiting.")
         return
 
     # --- Core Agent Orchestration (Task 11) ---
     if ai_instance and args.company:
-        process_single_company(args.company, ai_instance, args.model, config, siya_logger, current_run_id, selected_prompt_version)
+        process_single_company(args.company, ai_instance, args.model, config, app_logger, current_run_id, selected_prompt_version)
     elif ai_instance and args.csv_file:
-        siya_logger.info(f"Processing companies from CSV: {args.csv_file}")
+        app_logger.info(f"Processing companies from CSV: {args.csv_file}")
         companies_to_process = read_companies_from_csv(args.csv_file)
         if companies_to_process:
-            siya_logger.info(f"Starting batch processing of {len(companies_to_process)} companies from '{args.csv_file}'.")
+            app_logger.info(f"Starting batch processing of {len(companies_to_process)} companies from '{args.csv_file}'.")
             for company_name in companies_to_process:
                 if company_name:
-                    process_single_company(company_name, ai_instance, args.model, config, siya_logger, current_run_id, selected_prompt_version)
+                    process_single_company(company_name, ai_instance, args.model, config, app_logger, current_run_id, selected_prompt_version)
                 else:
-                    siya_logger.warning("Skipping empty company name found in CSV.")
+                    app_logger.warning("Skipping empty company name found in CSV.")
         else:
-            siya_logger.warning(f"No companies found in CSV file: {args.csv_file}. Please check the file content.")
+            app_logger.warning(f"No companies found in CSV file: {args.csv_file}. Please check the file content.")
     else:
-        siya_logger.info("No company or CSV file specified. Use --company or --csv_file argument.")
+        app_logger.info("No company or CSV file specified. Use --company or --csv_file argument.")
 
-    siya_logger.info("SIYA Agent finished.")
-
-if __name__ == "__main__":
-    main()
+    app_logger.info("SIGA application finished.")

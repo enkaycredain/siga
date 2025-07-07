@@ -1,10 +1,11 @@
 # src/ai_models/base.py
 from abc import ABC, abstractmethod
 from typing import List, Dict
+import logging
 
 class AIBaseModel(ABC):
     """
-    Abstract Base Class (ABC) for all AI model integrations in SIYA.
+    Abstract Base Class (ABC) for all AI model integrations in SIGA.
     Defines the common interface that all AI providers must implement.
     """
 
@@ -19,7 +20,7 @@ class AIBaseModel(ABC):
                            including API keys and preferred model names.
         """
         self.config = config
-        self.logger = logging.getLogger('siya_agent') # Get the shared logger instance
+        self.logger = logging.getLogger('siga.app')
 
     @abstractmethod
     def list_available_models(self) -> List[str]:
@@ -32,7 +33,7 @@ class AIBaseModel(ABC):
         pass
 
     @abstractmethod
-    def extract_company_info(self, company_name: str, model_name: str) -> Dict:
+    def extract_company_info(self, company_name: str, model_name: str, user_template: str, system_message: str) -> Dict:
         """
         Abstract method to extract company and subsidiary information using the AI model.
         This method should leverage the AI's internal knowledge only.
@@ -40,6 +41,8 @@ class AIBaseModel(ABC):
         Args:
             company_name (str): The name of the company to research.
             model_name (str): The specific AI model to use for the extraction.
+            user_template (str): The user prompt template string to use for the AI call.
+            system_message (str): The system message string to use for the AI call.
 
         Returns:
             Dict: A dictionary containing the extracted information.
@@ -48,7 +51,7 @@ class AIBaseModel(ABC):
                   - "subsidiaries": List[Dict] (each dict having "name", "location", etc.)
                   - "financial_info": Dict (e.g., "revenue": ..., "as_of_date": ...)
                   - "news_info": List[Dict] (each dict having "headline", "date", "summary")
-                  - "extracted_as_of_date": str (date reflecting AI's knowledge cut-off if available, or current date)
+                  - "extracted_as_of_date": str (date reflecting AI's knowledge cut-off or current date)
                   If extraction fails, an empty dictionary or a dictionary with an "error" key can be returned.
         """
         pass
@@ -64,13 +67,6 @@ class AIBaseModel(ABC):
         """
         pass
 
-    # Note: We don't need a concrete implementation for the logger here,
-    # as it's already set up globally and retrieved by name.
-    # The 'config' will be passed to concrete implementations for API keys etc.
-
 if __name__ == "__main__":
-    # Example Usage for AIBaseModel (for testing purposes, won't run directly)
-    # This block is here for completeness but cannot be run as it's an ABC.
-    # It demonstrates how concrete classes would implement it.
     print("This is an abstract base class. It cannot be instantiated directly.")
     print("Concrete AI model implementations will inherit from AIBaseModel.")

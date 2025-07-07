@@ -18,7 +18,7 @@ class OpenAIModel(AIBaseModel):
     def __init__(self, config: Dict):
         super().__init__(config)
         self.api_key = self.config.get("OPENAI_API_KEY")
-        self.preferred_model = self.config.get("OPENAI_PREFERRED_MODEL", "gpt-4o") # Default if not in config
+        self.preferred_model = self.config.get("OPENAI_PREFERRED_MODEL", "gpt-4o")
 
         if not self.api_key:
             self.logger.error("OpenAI API key not found in configuration. OpenAI models cannot be used.")
@@ -28,22 +28,11 @@ class OpenAIModel(AIBaseModel):
         self.logger.info("OpenAIModel initialized.")
 
     def list_available_models(self) -> List[str]:
-        """
-        Lists available OpenAI models that are typically used for chat completions.
-        Filters for models that are generally suitable for text generation.
-
-        Returns:
-            List[str]: A list of available OpenAI model IDs.
-        """
         self.logger.info("Attempting to list available OpenAI models...")
         available_model_ids = []
         try:
-            # Fetch all models and filter for chat-capable ones
-            # This list might need to be updated as OpenAI changes its models
             response = self.client.models.list()
             for model in response.data:
-                # Filter for common chat/completion models.
-                # This is a heuristic and might need adjustment.
                 if "gpt" in model.id or "davinci" in model.id or "babbage" in model.id or "curie" in model.id or "ada" in model.id:
                     available_model_ids.append(model.id)
             self.logger.info(f"Found {len(available_model_ids)} OpenAI models.")
@@ -53,9 +42,9 @@ class OpenAIModel(AIBaseModel):
             self.logger.error(f"OpenAI API Connection Error: Could not connect to OpenAI API. {e}")
         except Exception as e:
             self.logger.error(f"An unexpected error occurred while listing OpenAI models: {e}")
-        return sorted(list(set(available_model_ids))) # Return unique and sorted list
+        return sorted(list(set(available_model_ids)))
 
-    def extract_company_info(self, company_name: str, model_name: str, user_template: str, system_message: str) -> Dict: # Updated signature
+    def extract_company_info(self, company_name: str, model_name: str, user_template: str, system_message: str) -> Dict:
         """
         Extracts company and subsidiary information using the specified OpenAI model.
         This uses the provided prompt template and relies on the AI's internal knowledge.
@@ -71,23 +60,21 @@ class OpenAIModel(AIBaseModel):
         """
         self.logger.info(f"Extracting info for '{company_name}' using OpenAI model '{model_name}'...")
         
-        # Replace the placeholder in the user_template with the actual company name
         user_prompt_content = user_template.replace("[COMPANY_PLACEHOLDER]", company_name)
 
         try:
             response = self.client.chat.completions.create(
                 model=model_name,
                 messages=[
-                    {"role": "system", "content": system_message}, # Use the passed system_message
-                    {"role": "user", "content": user_prompt_content} # Use the prepared user_prompt_content
+                    {"role": "system", "content": system_message},
+                    {"role": "user", "content": user_prompt_content}
                 ],
-                temperature=0.1, # Keep temperature low to reduce hallucination
-                max_tokens=1500, # Adjust as needed for comprehensive output
-                response_format={"type": "json_object"} # Request JSON output
+                temperature=0.1,
+                max_tokens=1500,
+                response_format={"type": "json_object"}
             )
             raw_content = response.choices[0].message.content
             self.logger.debug(f"OpenAI raw response: {raw_content}")
-            # Attempt to parse the JSON string
             extracted_data = json.loads(raw_content)
             self.logger.info(f"Successfully extracted info for '{company_name}' using OpenAI.")
             return extracted_data
@@ -105,13 +92,9 @@ class OpenAIModel(AIBaseModel):
             return {"error": f"Unexpected error: {e}"}
 
     def get_preferred_model(self) -> str:
-        """
-        Returns the preferred/default OpenAI model name from configuration.
-        """
         return self.preferred_model
 
 if __name__ == "__main__":
-    # This block is for testing the OpenAIModel directly.
     from src.config_loader import load_config
     from src.logger import setup_logging
     from dotenv import load_dotenv
@@ -139,7 +122,6 @@ if __name__ == "__main__":
             if model_to_use not in models:
                 test_logger.warning(f"Preferred model '{preferred}' not found. 'gpt-3.5-turbo' also not found. Cannot test extraction.")
             else:
-                # Use prompt data from config for testing
                 test_prompt_data = config["PROMPT_TEMPLATES"].get(
                     config["DEFAULT_PROMPT_VERSION"], {}
                 )

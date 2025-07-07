@@ -25,4 +25,6 @@ dependencies:
   - openai
   - google-generativeai
   - requests
+  - pandas
+  - openpyxl
 prefix: /opt/anaconda3/envs/siya_env

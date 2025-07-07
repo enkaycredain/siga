@@ -55,7 +55,7 @@ class OllamaModel(AIBaseModel):
         self.logger.info("Attempting to list available Ollama models...")
         available_model_names = []
         try:
-            data = self._make_api_request("/api/tags", timeout=self.timeout_seconds) # Apply timeout here
+            data = self._make_api_request("/api/tags", timeout=self.timeout_seconds)
             if "models" in data:
                 for model_info in data["models"]:
                     if "name" in model_info:
@@ -65,7 +65,7 @@ class OllamaModel(AIBaseModel):
             self.logger.error(f"An error occurred while listing Ollama models: {e}")
         return sorted(list(set(available_model_names)))
 
-    def extract_company_info(self, company_name: str, model_name: str, user_template: str, system_message: str) -> Dict: # Updated signature
+    def extract_company_info(self, company_name: str, model_name: str, user_template: str, system_message: str) -> Dict:
         """
         Extracts company and subsidiary information using the specified Ollama model.
         This uses the provided prompt template and relies on the AI's internal knowledge.
@@ -81,15 +81,14 @@ class OllamaModel(AIBaseModel):
         """
         self.logger.info(f"Extracting info for '{company_name}' using Ollama model '{model_name}'...")
         
-        # Replace the placeholder in the user_template with the actual company name
         user_prompt_content = user_template.replace("[COMPANY_PLACEHOLDER]", company_name)
 
         try:
             json_data = {
                 "model": model_name,
                 "messages": [
-                    {"role": "system", "content": system_message}, # Use the passed system_message
-                    {"role": "user", "content": user_prompt_content} # Use the prepared user_prompt_content
+                    {"role": "system", "content": system_message},
+                    {"role": "user", "content": user_prompt_content}
                 ],
                 "stream": False,
                 "options": {
@@ -97,7 +96,7 @@ class OllamaModel(AIBaseModel):
                     "num_predict": 1500
                 }
             }
-            response_data = self._make_api_request("/api/chat", method="POST", json_data=json_data, timeout=self.timeout_seconds) # Apply timeout here
+            response_data = self._make_api_request("/api/chat", method="POST", json_data=json_data, timeout=self.timeout_seconds)
             raw_content = response_data.get("message", {}).get("content", "")
             self.logger.debug(f"Ollama raw response: {raw_content}")
             extracted_data = json.loads(raw_content)
@@ -144,7 +143,6 @@ if __name__ == "__main__":
             if model_to_use not in models:
                 test_logger.warning(f"Preferred model '{preferred}' not found. 'llama2' also not found. Cannot test extraction.")
             else:
-                # Use prompt data from config for testing
                 test_prompt_data = config["PROMPT_TEMPLATES"].get(
                     config["DEFAULT_PROMPT_VERSION"], {}
                 )

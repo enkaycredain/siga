@@ -2,9 +2,9 @@
 import os
 from dotenv import load_dotenv
 import logging
-import json # Added import for JSON parsing
+import json
 
-logger = logging.getLogger('siya_agent')
+logger = logging.getLogger('siga.app')
 
 def load_config():
     """Loads environment variables from .env file and returns a dictionary of configurations."""
@@ -28,7 +28,7 @@ def load_config():
         "LOG_LEVEL": os.getenv("LOG_LEVEL", "INFO").upper(),
         
         # Prompt Configuration
-        "DEFAULT_PROMPT_VERSION": os.getenv("DEFAULT_PROMPT_VERSION", "subsidiary_research_v1") # New default prompt setting
+        "DEFAULT_PROMPT_VERSION": os.getenv("DEFAULT_PROMPT_VERSION", "subsidiary_research_v1")
     }
 
     # Load prompt templates from config/prompts.json
@@ -41,7 +41,7 @@ def load_config():
             logger.info(f"Loaded {len(config['PROMPT_TEMPLATES'])} prompt templates from {prompts_file_path}")
         except json.JSONDecodeError as e:
             logger.error(f"Error parsing prompts.json: {e}. Please check the JSON format.")
-            config["PROMPT_TEMPLATES"] = {} # Ensure it's an empty dict on error
+            config["PROMPT_TEMPLATES"] = {}
         except Exception as e:
             logger.error(f"An unexpected error occurred while loading prompts.json: {e}")
             config["PROMPT_TEMPLATES"] = {}
@@ -69,7 +69,6 @@ if __name__ == "__main__":
     print(f"Loaded Prompt Templates: {list(app_config.get('PROMPT_TEMPLATES', {}).keys())}")
     print(f"Default Prompt Version: {app_config.get('DEFAULT_PROMPT_VERSION')}")
 
-    # Test retrieving a specific prompt
     test_prompt_version = app_config.get("DEFAULT_PROMPT_VERSION")
     if test_prompt_version in app_config["PROMPT_TEMPLATES"]:
         prompt_data = app_config["PROMPT_TEMPLATES"][test_prompt_version]
