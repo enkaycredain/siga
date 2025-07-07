@@ -18,7 +18,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from src.config_loader import load_config
 from src.logger import setup_logging
-from src.utils import read_companies_from_csv
 
 # Import concrete AI model implementations
 from src.ai_models.openai_model import OpenAIModel

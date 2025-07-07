@@ -1,41 +1,26 @@
-# Python
+# Python bytecode
 __pycache__/
 *.pyc
 *.pyd
 *.pyo
-.Python/
-build/
-develop-eggs/
-dist/
-eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.pkl
-*.log
 
-# Conda environments
-.conda/
-.condarc
+# Virtual environments
 .venv/
 env/
 venv/
-*siya_env*/ # Ignored specific Conda env folder if created directly in project
-.ipynb_checkpoints/ # Jupyter notebooks
+siga_env/ # Specific Conda env folder if created directly in project
 
-# IDEs and Editors
+# IDEs and OS generated files
 .vscode/
 .idea/
-*.sublime-project
-*.sublime-workspace
 .DS_Store
 Thumbs.db
+
+# Sensitive and generated files
 .env
-*.csv
-output.csv
+*.log
+# The 'data/' directory contains all generated outputs (Excel, JSON)
+# and should not be committed to version control.
+data/
+# The 'logs/' directory contains log files and should not be committed.
+logs/
