@@ -51,7 +51,7 @@ To set up your development environment and install dependencies, please refer to
         * Call `ai_instance.list_available_models()` after provider selection.
         * Present the discovered models to the user (numbered, with preferred default highlighted).
         * Allow the user to select a specific model.
-* [ ] Task 9: Google AI (Gemini) Integration (with Model Listing) (In Progress)
+* [x] Task 9: Google AI (Gemini) Integration (with Model Listing) (Completed)
     * **Objective:** Implement Google AI concrete class, including its `list_available_models` method.
     * **Details:**
         * Create `src/ai_models/google_ai_model.py`.
@@ -59,12 +59,25 @@ To set up your development environment and install dependencies, please refer to
         * Implement `list_available_models()` using Google AI's API.
         * Implement a basic `extract_company_info()` (prompt engineering can be refined later).
         * Add `google-generativeai` library to `environment.yml`.
-* [ ] Task 10: Ollama/Oobabooga Integration (with Model Listing)
+* [x] Task 10: Ollama/Oobabooga Integration (with Model Listing) (Completed)
     * **Objective:** Implement Ollama/Oobabooga concrete class, including its `list_available_models` method.
-    * **Details:** (Similar to Task 8 for Ollama API)
-* [ ] Task 11: Core Agent Orchestration (Single Company Processing)
-    * **Objective:** Build the main agent logic to process a single company using the selected AI model.
-    * **Details:** (Remains largely the same, integrating the fully selected AI model instance).
+    * **Details:**
+        * Create `src/ai_models/ollama_model.py`.
+        * Implement `OllamaModel` adhering to the interface.
+        * Implement `list_available_models()` using Ollama's API (requires `requests` or `ollama` client).
+        * Implement a basic `extract_company_info()` (prompt engineering can be refined later).
+        * Add `requests` (and/or `ollama`) library to `environment.yml`.
+* [ ] Task 11: Core Agent Orchestration (Single Company Processing) (In Progress)
+    * **Objective:** Build the main agent logic to process a single company using the selected AI model, handle timeouts, and save output to CSV.
+    * **Details:**
+        * Update `src/main.py`.
+        * Instantiate the chosen AI model.
+        * Implement a `process_company` function that calls `ai_instance.extract_company_info`.
+        * Implement the 1-minute timeout for AI calls.
+        * Implement CSV output logic:
+            * Ensure the output CSV file (`output.csv` in `data/`) is created if it doesn't exist, with a header.
+            * Append each company's extracted data (flattened) along with `Date Time of Run`, `AI Model Chosen`, and `Prompt Used` to the CSV.
+        * Handle errors by logging and skipping the company, as per requirements.
 ---
 
 ## Logging
