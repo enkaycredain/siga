@@ -31,13 +31,13 @@ To set up your development environment and install dependencies, please refer to
             * Improved interactive prompt for provider selection: present numbered choices, highlight preferred default from `.env`.
             * This part will NOT yet dynamically list *models* from providers; that comes after Task 7/8.
         * Ensure `python -m src.main` is clearly documented as the way to run the application.
-* [ ] Task 7: Abstract AI Interface with Model Listing (In Progress)
+* [x] Task 7: Abstract AI Interface with Model Listing (Completed)
     * **Objective:** Define a common interface for AI models, *including a method to list available models from the provider*.
     * **Details:**
         * Create `src/ai_models/base.py`.
         * Define an abstract base class (ABC) with methods like `extract_company_info(self, company_name: str) -> dict` and `list_available_models(self) -> list[str]`.
         * Include a `get_preferred_model(self) -> str` property/method to retrieve the preferred default model for that provider (from config).
-* [ ] Task 8: OpenAI Integration (Initial: `extract_company_info` & `list_available_models`)
+* [ ] Task 8: OpenAI Integration (Initial: `extract_company_info` & `list_available_models`) (In Progress)
     * **Objective:** Implement OpenAI concrete class supporting information extraction and model listing.
     * **Details:**
         * Create `src/ai_models/openai_model.py`.
