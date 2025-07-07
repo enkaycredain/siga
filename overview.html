@@ -1,0 +1,420 @@
+Of course. Based on the "Subsidiary Intelligence Gathering Agent (SIGA) - Project Overview" report you provided, I will create a single-page interactive web application to visualize its content.
+
+This web application will transform the report's sections into an engaging, easy-to-navigate experience. I'll design a clean layout with distinct sections for the project overview, core capabilities, technology stack, architecture, and future roadmap. A key feature will be an interactive diagram, built with HTML and CSS, that visually represents the agent's workflow.
+
+Here is the complete HTML file for the application.
+
+```html
+<!-- Chosen Palette: Tech Professional (Slate, Sky) -->
+<!-- Application Structure Plan: The SPA is structured as a single, vertically scrolling page with a fixed top navigation bar for easy access to key sections: Overview, Features, Tech Stack, Architecture, and Roadmap. This design was chosen over a simple text document to allow users to quickly grasp the project's scope and dive into specific areas of interest. The highlight is an interactive HTML/CSS flowchart for the architecture, making a complex process easily understandable. This non-linear, section-based approach enhances usability and user engagement significantly more than a linear report. -->
+<!-- Visualization & Content Choices: 
+- Report Info: "Core Capabilities" list. -> Goal: Compare/Inform. -> Viz: Interactive Card Grid. -> Interaction: Hover to see subtle zoom effect. -> Justification: Breaks up text, more scannable and visually appealing than a bulleted list. -> Library/Method: HTML/Tailwind CSS.
+- Report Info: "Key Technologies" list. -> Goal: Inform. -> Viz: Icon-based Grid. -> Interaction: Hover to reveal description. -> Justification: More engaging and memorable than a plain list, provides context on-demand. -> Library/Method: HTML/Tailwind CSS/JS.
+- Report Info: "Concepts Employed" (Architecture). -> Goal: Organize/Explain Process. -> Viz: Interactive Flowchart Diagram. -> Interaction: Click on nodes to display detailed explanations. -> Justification: Visually explains the agent's workflow, making it far easier to understand than descriptive text. -> Library/Method: HTML/Tailwind CSS/JS.
+- Report Info: "Future Improvements" list. -> Goal: Show Change/Timeline. -> Viz: Vertical Timeline. -> Interaction: Static visual. -> Justification: Structures future plans chronologically and thematically, more impactful than a list. -> Library/Method: HTML/Tailwind CSS.
+- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGA - Subsidiary Intelligence Gathering Agent</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #1e293b; /* slate-800 */
+        }
+        .nav-link {
+            transition: color 0.3s ease, border-bottom-color 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #0284c7; /* sky-600 */
+            border-bottom-color: #0284c7; /* sky-600 */
+        }
+        .diagram-node {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .diagram-node:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .diagram-arrow {
+            position: relative;
+            width: 2px;
+            background-color: #94a3b8; /* slate-400 */
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .diagram-arrow::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 10px solid #94a3b8; /* slate-400 */
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header & Navigation -->
+    <header id="header" class="bg-white/80 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-slate-800">SIGA</h1>
+            <div class="hidden md:flex space-x-8">
+                <a href="#overview" class="nav-link font-medium">Overview</a>
+                <a href="#features" class="nav-link font-medium">Features</a>
+                <a href="#tech" class="nav-link font-medium">Tech Stack</a>
+                <a href="#architecture" class="nav-link font-medium">Architecture</a>
+                <a href="#roadmap" class="nav-link font-medium">Roadmap</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden text-slate-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+        </nav>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="#overview" class="block py-2 px-6 text-sm hover:bg-slate-100">Overview</a>
+            <a href="#features" class="block py-2 px-6 text-sm hover:bg-slate-100">Features</a>
+            <a href="#tech" class="block py-2 px-6 text-sm hover:bg-slate-100">Tech Stack</a>
+            <a href="#architecture" class="block py-2 px-6 text-sm hover:bg-slate-100">Architecture</a>
+            <a href="#roadmap" class="block py-2 px-6 text-sm hover:bg-slate-100">Roadmap</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-8">
+
+        <!-- 1. Overview Section -->
+        <section id="overview" class="py-20 text-center">
+            <h2 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">Subsidiary Intelligence Gathering Agent</h2>
+            <p class="text-lg md:text-xl text-slate-600 max-w-3xl mx-auto">
+                An intelligent command-line application to extract specific corporate intelligence from various LLMs, focusing on verifiable data from the model's internal knowledge base.
+            </p>
+        </section>
+        
+        <hr class="my-16 border-slate-200">
+
+        <!-- 2. Core Capabilities Section -->
+        <section id="features" class="py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold">Core Capabilities</h2>
+                <p class="text-slate-500 mt-2">SIGA is designed with a focus on flexibility, robustness, and traceability.</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Card 1: Targeted Extraction -->
+                <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <div class="text-sky-600 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Targeted Information Extraction</h3>
+                    <p class="text-slate-600">Focuses specifically on gathering subsidiary names, locations, and data sources, minimizing noise and maximizing relevance.</p>
+                </div>
+                <!-- Card 2: Flexible LLM Integration -->
+                <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+                     <div class="text-sky-600 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10m0-2s2 2 3 3m2-5s2 2 3 3" /></svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Flexible LLM Integration</h3>
+                    <p class="text-slate-600">Supports OpenAI, Google AI (Gemini), and local Ollama models, allowing users to choose the best tool for their needs and budget.</p>
+                </div>
+                <!-- Card 3: Dynamic Selection -->
+                <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <div class="text-sky-600 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" /></svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Dynamic Model & Prompt Selection</h3>
+                    <p class="text-slate-600">Interactively lists available models from the chosen provider and allows selection from versioned, externalized prompt templates.</p>
+                </div>
+                <!-- Card 4: Robust Output -->
+                <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <div class="text-sky-600 mb-4">
+                       <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Robust Output & Traceability</h3>
+                    <p class="text-slate-600">Generates a structured Excel file with linked summary/detail sheets and saves raw JSON responses for complete auditability.</p>
+                </div>
+                 <!-- Card 5: Error Handling -->
+                <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+                     <div class="text-sky-600 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Error Handling & Resumption</h3>
+                    <p class="text-slate-600">Features a 1-minute timeout for AI calls and skips failed entries during batch processing to ensure continuous operation.</p>
+                </div>
+                 <!-- Card 6: Concepts -->
+                <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+                     <div class="text-sky-600 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Modern Agentic Design</h3>
+                    <p class="text-slate-600">Employs a modular architecture, abstract interfaces, and sophisticated prompt engineering to create an extensible and reliable agent.</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-16 border-slate-200">
+
+        <!-- 3. Tech Stack Section -->
+        <section id="tech" class="py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold">Key Technologies</h2>
+                <p class="text-slate-500 mt-2">Built with a modern, robust Python-based stack.</p>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 text-center">
+                 <div class="tech-item bg-white p-4 rounded-lg shadow-md flex flex-col items-center justify-center space-y-2">
+                    <span class="text-4xl">🐍</span>
+                    <h4 class="font-semibold">Python</h4>
+                    <p class="text-xs text-slate-500 description hidden">The core programming language for all application logic.</p>
+                </div>
+                <div class="tech-item bg-white p-4 rounded-lg shadow-md flex flex-col items-center justify-center space-y-2">
+                    <span class="text-4xl">📦</span>
+                    <h4 class="font-semibold">Conda</h4>
+                    <p class="text-xs text-slate-500 description hidden">For creating isolated and reproducible development environments.</p>
+                </div>
+                <div class="tech-item bg-white p-4 rounded-lg shadow-md flex flex-col items-center justify-center space-y-2">
+                    <span class="text-4xl">🤖</span>
+                    <h4 class="font-semibold">OpenAI & Google AI</h4>
+                    <p class="text-xs text-slate-500 description hidden">Python clients for seamless integration with powerful cloud-based LLMs.</p>
+                </div>
+                <div class="tech-item bg-white p-4 rounded-lg shadow-md flex flex-col items-center justify-center space-y-2">
+                    <span class="text-4xl">🏠</span>
+                    <h4 class="font-semibold">Ollama</h4>
+                    <p class="text-xs text-slate-500 description hidden">Allows integration with locally hosted LLMs for privacy and offline use.</p>
+                </div>
+                 <div class="tech-item bg-white p-4 rounded-lg shadow-md flex flex-col items-center justify-center space-y-2">
+                    <span class="text-4xl">🐼</span>
+                    <h4 class="font-semibold">Pandas</h4>
+                    <p class="text-xs text-slate-500 description hidden">Used for robust reading of company lists from input CSV files.</p>
+                </div>
+                <div class="tech-item bg-white p-4 rounded-lg shadow-md flex flex-col items-center justify-center space-y-2">
+                    <span class="text-4xl">📋</span>
+                    <h4 class="font-semibold">Openpyxl</h4>
+                    <p class="text-xs text-slate-500 description hidden">Enables writing of structured data to multi-sheet Excel (.xlsx) files.</p>
+                </div>
+                 <div class="tech-item bg-white p-4 rounded-lg shadow-md flex flex-col items-center justify-center space-y-2">
+                    <span class="text-4xl">🔑</span>
+                    <h4 class="font-semibold">Dotenv</h4>
+                    <p class="text-xs text-slate-500 description hidden">For securely managing API keys and configuration in a .env file.</p>
+                </div>
+                <div class="tech-item bg-white p-4 rounded-lg shadow-md flex flex-col items-center justify-center space-y-2">
+                    <span class="text-4xl">⚙️</span>
+                    <h4 class="font-semibold">Threading & UUID</h4>
+                    <p class="text-xs text-slate-500 description hidden">Standard libraries for implementing call timeouts and generating unique IDs.</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-16 border-slate-200">
+
+        <!-- 4. Architecture Section -->
+        <section id="architecture" class="py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold">Application Architecture</h2>
+                <p class="text-slate-500 mt-2">A visual representation of the agent's workflow. Click on a node for details.</p>
+            </div>
+            <div class="flex flex-col md:flex-row gap-8 items-start">
+                <!-- Diagram -->
+                <div class="w-full md:w-1/2 flex flex-col items-center space-y-2">
+                    <div id="node-input" class="diagram-node bg-white p-4 rounded-lg shadow-lg w-3/4 text-center">
+                        <h4 class="font-semibold">1. User Input</h4>
+                        <p class="text-sm text-slate-500">CLI Command</p>
+                    </div>
+                    <div class="diagram-arrow h-8"></div>
+                    <div id="node-main" class="diagram-node bg-white p-4 rounded-lg shadow-lg w-3/4 text-center">
+                        <h4 class="font-semibold">2. Main Orchestrator</h4>
+                        <p class="text-sm text-slate-500">src/main.py</p>
+                    </div>
+                    <div class="diagram-arrow h-8"></div>
+                    <div id="node-selection" class="diagram-node bg-sky-100 border-2 border-sky-400 p-4 rounded-lg shadow-lg w-3/4 text-center">
+                        <h4 class="font-semibold">3. Interactive Selection</h4>
+                        <p class="text-sm text-slate-500">Provider → Model → Prompt</p>
+                    </div>
+                    <div class="diagram-arrow h-8"></div>
+                     <div id="node-ai" class="diagram-node bg-white p-4 rounded-lg shadow-lg w-3/4 text-center">
+                        <h4 class="font-semibold">4. AI Model Call</h4>
+                        <p class="text-sm text-slate-500">via Abstract Interface</p>
+                    </div>
+                    <div class="diagram-arrow h-8"></div>
+                    <div id="node-output" class="diagram-node bg-white p-4 rounded-lg shadow-lg w-3/4 text-center">
+                         <h4 class="font-semibold">5. Structured Output</h4>
+                        <p class="text-sm text-slate-500">Excel & Raw JSON</p>
+                    </div>
+                </div>
+                <!-- Details Panel -->
+                <div class="w-full md:w-1/2 p-6 bg-slate-100 rounded-lg min-h-[300px]">
+                    <h3 id="details-title" class="text-xl font-bold mb-2 text-sky-700">Click a node</h4>
+                    <p id="details-content" class="text-slate-700">Select a step in the diagram to see a detailed explanation of its role in the SIGA workflow.</p>
+                </div>
+            </div>
+        </section>
+
+        <hr class="my-16 border-slate-200">
+
+        <!-- 5. Roadmap Section -->
+        <section id="roadmap" class="py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold">Future Improvements</h2>
+                <p class="text-slate-500 mt-2">A clear roadmap for enhancing SIGA's capabilities.</p>
+            </div>
+             <!-- Timeline -->
+            <div class="relative max-w-2xl mx-auto">
+                <!-- Vertical line -->
+                <div class="absolute left-1/2 transform -translate-x-1/2 h-full w-0.5 bg-slate-300"></div>
+                
+                <!-- Timeline Item 1 -->
+                <div class="relative mb-8 flex justify-between items-center w-full">
+                    <div class="w-5/12"></div>
+                    <div class="z-10 bg-sky-600 text-white rounded-full h-8 w-8 flex items-center justify-center font-bold">1</div>
+                    <div class="w-5/12 bg-white p-4 rounded-lg shadow-md">
+                        <h4 class="font-bold">Multi-Company Batch Processing</h4>
+                        <p class="text-sm text-slate-600">Implement progress tracking and failure recovery for processing large lists of companies from a CSV file.</p>
+                    </div>
+                </div>
+
+                <!-- Timeline Item 2 -->
+                <div class="relative mb-8 flex justify-between items-center w-full">
+                    <div class="w-5/12 bg-white p-4 rounded-lg shadow-md text-right">
+                        <h4 class="font-bold">Data Combination</h4>
+                        <p class="text-sm text-slate-600">Develop functionality to query multiple AI providers for the same company and intelligently merge the results.</p>
+                    </div>
+                    <div class="z-10 bg-sky-600 text-white rounded-full h-8 w-8 flex items-center justify-center font-bold">2</div>
+                    <div class="w-5/12"></div>
+                </div>
+
+                <!-- Timeline Item 3 -->
+                <div class="relative mb-8 flex justify-between items-center w-full">
+                    <div class="w-5/12"></div>
+                    <div class="z-10 bg-sky-600 text-white rounded-full h-8 w-8 flex items-center justify-center font-bold">3</div>
+                    <div class="w-5/12 bg-white p-4 rounded-lg shadow-md">
+                        <h4 class="font-bold">General Research Framework</h4>
+                        <p class="text-sm text-slate-600">Extend SIGA to research other topics by making the target information and output structure more configurable.</p>
+                    </div>
+                </div>
+
+                <!-- Timeline Item 4 -->
+                 <div class="relative mb-8 flex justify-between items-center w-full">
+                    <div class="w-5/12 bg-white p-4 rounded-lg shadow-md text-right">
+                        <h4 class="font-bold">LlamaIndex Integration</h4>
+                        <p class="text-sm text-slate-600">Rebuild the core with LlamaIndex to enable querying custom knowledge bases and more sophisticated reasoning.</p>
+                    </div>
+                    <div class="z-10 bg-sky-600 text-white rounded-full h-8 w-8 flex items-center justify-center font-bold">4</div>
+                    <div class="w-5/12"></div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-800 text-white mt-20">
+        <div class="container mx-auto px-6 py-8 text-center text-sm">
+            <p>&copy; 2025 SIGA Project. All rights reserved.</p>
+            <p class="text-slate-400 mt-2">This is an interactive visualization of the SIGA Project Overview report.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Tech stack hover effect
+            const techItems = document.querySelectorAll('.tech-item');
+            techItems.forEach(item => {
+                const description = item.querySelector('.description');
+                item.addEventListener('mouseenter', () => {
+                    description.classList.remove('hidden');
+                    description.classList.add('fade-in');
+                });
+                item.addEventListener('mouseleave', () => {
+                    description.classList.add('hidden');
+                    description.classList.remove('fade-in');
+                });
+            });
+
+            // Architecture Diagram Interaction
+            const diagramNodes = {
+                'node-input': {
+                    title: '1. User Input & Configuration',
+                    content: 'The process begins when a user runs the agent from the command line. They provide arguments like the company name (--company) or a CSV file path (--csv_file), and can choose to run in interactive mode. The agent first loads API keys and settings from the `.env` file.'
+                },
+                'node-main': {
+                    title: '2. Main Orchestrator (main.py)',
+                    content: 'The `main.py` script acts as the central hub. It parses command-line arguments, sets up logging, and orchestrates the entire workflow, including handling user selections and calling the appropriate processing functions.'
+                },
+                'node-selection': {
+                    title: '3. Interactive Selection',
+                    content: 'In interactive mode, the agent communicates with the user. It dynamically fetches and lists available AI providers, models, and prompt templates, allowing the user to make selections for the specific research task.'
+                },
+                'node-ai': {
+                    title: '4. AI Model Call',
+                    content: 'Based on the user\'s selection, an instance of the appropriate AI model class (e.g., OpenAIModel, GoogleAIModel) is created. The agent then calls its `extract_company_info` method, sending a carefully engineered prompt to the LLM API.'
+                },
+                'node-output': {
+                    title: '5. Structured Output Generation',
+                    content: 'The agent receives a response from the LLM, which it expects to be in JSON format. It then parses this data and writes it to two different formats: a structured Excel file with linked "Summary" and "Detail" sheets, and a raw JSON file for complete auditability.'
+                }
+            };
+
+            const detailsTitle = document.getElementById('details-title');
+            const detailsContent = document.getElementById('details-content');
+            
+            Object.keys(diagramNodes).forEach(nodeId => {
+                const nodeElement = document.getElementById(nodeId);
+                nodeElement.addEventListener('click', () => {
+                    const nodeData = diagramNodes[nodeId];
+                    detailsTitle.textContent = nodeData.title;
+                    detailsContent.textContent = nodeData.content;
+                    detailsTitle.parentElement.classList.remove('fade-in');
+                    void detailsTitle.parentElement.offsetWidth; // Trigger reflow
+                    detailsTitle.parentElement.classList.add('fade-in');
+                });
+            });
+
+            // Nav link active state on scroll
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.toggle('active', link.getAttribute('href').substring(1) === entry.target.id);
+                        });
+                    }
+                });
+            }, { rootMargin: '-50% 0px -50% 0px' });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+
+</body>
+</html>
