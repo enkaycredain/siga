@@ -34,10 +34,8 @@ venv/
 .idea/
 *.sublime-project
 *.sublime-workspace
-.DS_Store # macOS specific
-Thumbs.db # Windows specific
-
-# Specific to SIYA project
-.env # CRITICAL: This ignores your actual .env file with API keys
-*.csv # You might want to ignore all .csv initially or only output.csv if it's large
-output.csv # Specifically ignore the output CSV if it gets very large and shouldn't be versioned
+.DS_Store
+Thumbs.db
+.env
+*.csv
+output.csv
