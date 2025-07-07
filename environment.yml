@@ -23,4 +23,5 @@ dependencies:
   - zlib=1.2.13=h18a0788_1
   - python-dotenv #
   - openai
+  - google-generativeai
 prefix: /opt/anaconda3/envs/siya_env
