@@ -1,6 +1,6 @@
 
 
-# Subsidiary Intelligence Yielding Analyst (SIYA)
+# Subsidiary Intelligence Gthering Analyst (SIGA)
 
 An agentic solution designed to extract comprehensive company and subsidiary information (locations, financials, news) solely from the internal knowledge of various AI models. SIYA aims to provide structured, relevant data efficiently and robustly, with user-selectable AI models and comprehensive logging.
 
