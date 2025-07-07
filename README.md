@@ -22,8 +22,6 @@ To set up your development environment and install dependencies, please refer to
 
 ### Phase 2: Core Agent Logic & AI Integration
 
-### Phase 2: Core Agent Logic & AI Integration
-
 * [x] Task 6: Configuration Loading & CLI for Provider Selection (Part 1 - Improved UX)
     * **Objective:** Load environment variables from `.env` and allow the user to select the desired AI *provider* via the CLI with improved interactive experience (numbered choices, default highlighting).
     * **Details:**
@@ -47,15 +45,20 @@ To set up your development environment and install dependencies, please refer to
         * Implement `list_available_models()` using OpenAI's API.
         * Implement a basic `extract_company_info()` (prompt engineering can be refined later).
         * Add `openai` library to `environment.yml`.
-* [ ] Task 6 (Part 2 - Complete Dynamic Model Selection) (In Progress)
+* [x] Task 6 (Part 2 - Complete Dynamic Model Selection) (Completed)
     * **Objective:** Revisit `src/main.py` to fully integrate dynamic model listing and selection after provider choice.
     * **Details:**
         * Call `ai_instance.list_available_models()` after provider selection.
         * Present the discovered models to the user (numbered, with preferred default highlighted).
         * Allow the user to select a specific model.
-* [ ] Task 9: Google AI (Gemini) Integration (with Model Listing)
+* [ ] Task 9: Google AI (Gemini) Integration (with Model Listing) (In Progress)
     * **Objective:** Implement Google AI concrete class, including its `list_available_models` method.
-    * **Details:** (Similar to Task 8 for Google AI API)
+    * **Details:**
+        * Create `src/ai_models/google_ai_model.py`.
+        * Implement `GoogleAIModel` adhering to the interface.
+        * Implement `list_available_models()` using Google AI's API.
+        * Implement a basic `extract_company_info()` (prompt engineering can be refined later).
+        * Add `google-generativeai` library to `environment.yml`.
 * [ ] Task 10: Ollama/Oobabooga Integration (with Model Listing)
     * **Objective:** Implement Ollama/Oobabooga concrete class, including its `list_available_models` method.
     * **Details:** (Similar to Task 8 for Ollama API)
