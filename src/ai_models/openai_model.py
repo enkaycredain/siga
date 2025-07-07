@@ -3,7 +3,13 @@ import logging
 from typing import List, Dict
 import openai
 from openai import OpenAI
-from src.ai_models.base import AIBaseModel # Import the abstract base class
+import json
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
+
+from src.ai_models.base import AIBaseModel
 
 class OpenAIModel(AIBaseModel):
     """
@@ -49,38 +55,31 @@ class OpenAIModel(AIBaseModel):
             self.logger.error(f"An unexpected error occurred while listing OpenAI models: {e}")
         return sorted(list(set(available_model_ids))) # Return unique and sorted list
 
-    def extract_company_info(self, company_name: str, model_name: str) -> Dict:
+    def extract_company_info(self, company_name: str, model_name: str, user_template: str, system_message: str) -> Dict: # Updated signature
         """
         Extracts company and subsidiary information using the specified OpenAI model.
-        This uses a basic prompt and relies on the AI's internal knowledge.
+        This uses the provided prompt template and relies on the AI's internal knowledge.
 
         Args:
             company_name (str): The name of the company to research.
             model_name (str): The specific OpenAI model to use.
+            user_template (str): The user prompt template string to use for the AI call.
+            system_message (str): The system message string to use for the AI call.
 
         Returns:
             Dict: A dictionary containing the extracted information.
         """
         self.logger.info(f"Extracting info for '{company_name}' using OpenAI model '{model_name}'...")
-        prompt = (
-            f"Based on your internal knowledge, provide the following information for {company_name}:\n"
-            f"1. A list of its major direct and indirect subsidiaries globally, including their primary location (city, country).\n"
-            f"2. Key financial information (e.g., latest reported annual revenue, net income, market capitalization) with an 'as of' date for each financial figure.\n"
-            f"3. Any significant recent news or developments (last 1-2 years) related to its subsidiaries or major operations, with a brief summary and date.\n"
-            f"Format the output as a JSON object with the following structure:\n"
-            f'{{"company_name": "{company_name}", "extracted_as_of_date": "YYYY-MM-DD (AI knowledge cutoff or current date)",\n'
-            f'"subsidiaries": [{{"name": "Subsidiary Name", "location": "City, Country"}}],\n'
-            f'"financial_info": [{{"metric": "Revenue", "value": "X billion USD", "as_of_date": "YYYY-MM-DD"}}],\n'
-            f'"news_info": [{{"headline": "News Headline", "date": "YYYY-MM-DD", "summary": "Brief summary"}}]}}.\n'
-            f"Ensure all information is strictly from your training data and do not perform any external searches."
-        )
+        
+        # Replace the placeholder in the user_template with the actual company name
+        user_prompt_content = user_template.replace("[COMPANY_PLACEHOLDER]", company_name)
 
         try:
             response = self.client.chat.completions.create(
                 model=model_name,
                 messages=[
-                    {"role": "system", "content": "You are a highly knowledgeable and precise corporate research assistant. Provide information strictly from your training data and do not hallucinate or perform external searches. Focus on factual, verifiable data."},
-                    {"role": "user", "content": prompt}
+                    {"role": "system", "content": system_message}, # Use the passed system_message
+                    {"role": "user", "content": user_prompt_content} # Use the prepared user_prompt_content
                 ],
                 temperature=0.1, # Keep temperature low to reduce hallucination
                 max_tokens=1500, # Adjust as needed for comprehensive output
@@ -89,7 +88,6 @@ class OpenAIModel(AIBaseModel):
             raw_content = response.choices[0].message.content
             self.logger.debug(f"OpenAI raw response: {raw_content}")
             # Attempt to parse the JSON string
-            import json
             extracted_data = json.loads(raw_content)
             self.logger.info(f"Successfully extracted info for '{company_name}' using OpenAI.")
             return extracted_data
@@ -114,17 +112,12 @@ class OpenAIModel(AIBaseModel):
 
 if __name__ == "__main__":
     # This block is for testing the OpenAIModel directly.
-    # You would typically run this from src/main.py.
     from src.config_loader import load_config
     from src.logger import setup_logging
+    from dotenv import load_dotenv
     import os
 
-    # Set up basic logging for standalone test
     test_logger = setup_logging(log_level="DEBUG")
-
-    # Ensure .env is loaded for the test
-    # This is important for standalone testing if API keys are only in .env
-    from dotenv import load_dotenv
     load_dotenv()
 
     config = load_config()
@@ -135,23 +128,30 @@ if __name__ == "__main__":
             openai_instance = OpenAIModel(config)
             test_logger.info("OpenAIModel instance created successfully.")
 
-            # Test list_available_models
             models = openai_instance.list_available_models()
-            test_logger.info(f"Available OpenAI models: {models[:5]}...") # Print first 5 models
+            test_logger.info(f"Available OpenAI models: {models[:5]}...")
 
-            # Test get_preferred_model
             preferred = openai_instance.get_preferred_model()
             test_logger.info(f"Preferred OpenAI model: {preferred}")
 
-            # Test extract_company_info (using a test company)
             test_company = "Coca-Cola"
-            # Ensure the preferred model is in the available list, or pick a common one like 'gpt-3.5-turbo'
-            # For actual usage, you'd select from the 'models' list
             model_to_use = preferred if preferred in models else "gpt-3.5-turbo"
             if model_to_use not in models:
                 test_logger.warning(f"Preferred model '{preferred}' not found. 'gpt-3.5-turbo' also not found. Cannot test extraction.")
             else:
-                extracted_data = openai_instance.extract_company_info(test_company, model_to_use)
+                # Use prompt data from config for testing
+                test_prompt_data = config["PROMPT_TEMPLATES"].get(
+                    config["DEFAULT_PROMPT_VERSION"], {}
+                )
+                test_user_template = test_prompt_data.get("user_template", "Default user template for [COMPANY_PLACEHOLDER]")
+                test_system_message = test_prompt_data.get("system_message", "Default system message.")
+
+                if test_user_template == "Default user template for [COMPANY_PLACEHOLDER]":
+                    test_logger.warning("Using a generic fallback user template for testing.")
+                if test_system_message == "Default system message.":
+                    test_logger.warning("Using a generic fallback system message for testing.")
+
+                extracted_data = openai_instance.extract_company_info(test_company, model_to_use, test_user_template, test_system_message)
                 test_logger.info(f"Extracted data for {test_company}: {extracted_data}")
                 if "error" in extracted_data:
                     test_logger.error(f"Extraction failed: {extracted_data['error']}")

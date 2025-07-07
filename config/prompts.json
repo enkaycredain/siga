@@ -1,0 +1,12 @@
+{
+  "subsidiary_research_v1": {
+    "description": "Comprehensive prompt for extracting all subsidiaries, financials, and news.",
+    "system_message": "You are a highly knowledgeable and precise corporate research assistant. Provide information strictly from your training data and do not hallucinate or perform external searches. Focus on factual, verifiable data. Respond only with the requested JSON object.",
+    "user_template": "Based on your internal knowledge, provide the following information for [COMPANY_PLACEHOLDER]:\n1. A list of all direct and indirect subsidiaries globally, including their primary location (city, country).\n2. Key financial information (e.g., latest reported annual revenue, net income, market capitalization) with an 'as of' date for each financial figure.\n3. Any significant recent news or developments (last 1-2 years) related to its subsidiaries or major operations, with a brief summary and date.\nFormat the output as a JSON object with the following structure:\n{{\"company_name\": \"[COMPANY_PLACEHOLDER]\", \"extracted_as_of_date\": \"YYYY-MM-DD (AI knowledge cutoff or current date)\",\n\"subsidiaries\": [{{\"name\": \"Subsidiary Name\", \"location\": \"City, Country\"}}],\n\"financial_info\": [{{\"metric\": \"Revenue\", \"value\": \"X billion USD\", \"as_of_date\": \"YYYY-MM-DD\"}}],\n\"news_info\": [{{\"headline\": \"News Headline\", \"date\": \"YYYY-MM-DD\", \"summary\": \"Brief summary\"}}]}}.\nEnsure all information is strictly from your training data and do not perform any external searches."
+  },
+  "subsidiary_only_v1": {
+    "description": "Focused prompt for extracting only subsidiary information.",
+    "system_message": "You are a highly knowledgeable and precise corporate research assistant. Provide information strictly from your training data and do not hallucinate or perform external searches. Focus on factual, verifiable data. Respond only with the requested JSON object.",
+    "user_template": "Based on your internal knowledge, provide a comprehensive list of all direct and indirect subsidiaries globally for [COMPANY_PLACEHOLDER], including their primary location (city, country). Format the output as a JSON object with the following structure:\n{{\"company_name\": \"[COMPANY_PLACEHOLDER]\", \"extracted_as_of_date\": \"YYYY-MM-DD (AI knowledge cutoff or current date)\",\n\"subsidiaries\": [{{\"name\": \"Subsidiary Name\", \"location\": \"City, Country\"}}]}}.\nEnsure all information is strictly from your training data and do not perform any external searches."
+  }
+}
