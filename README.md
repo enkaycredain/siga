@@ -22,57 +22,44 @@ To set up your development environment and install dependencies, please refer to
 
 ### Phase 2: Core Agent Logic & AI Integration
 
-* [ ] Task 6: Configuration Loading & Dynamic AI Model Selection
-    * **Objective:** Load environment variables from `.env` and allow the user to dynamically select the desired AI model from *available* models via the CLI.
+* [x] Task 6: Configuration Loading & CLI for Provider Selection (Part 1 - Improved UX)
+    * **Objective:** Load environment variables from `.env` and allow the user to select the desired AI *provider* via the CLI with improved interactive experience (numbered choices, default highlighting).
     * **Details:**
-        * Implement `python-dotenv` for loading `.env` variables.
-        * Create `src/config_loader.py` to manage configuration.
-        * Create `src/main.py` as the CLI entry point.
-        * Implement argument parsing (e.g., using `argparse`) for `--provider <provider_name>` (e.g., `openai`, `google_ai`, `ollama`) and an optional `--model <model_name>` for non-interactive use.
-        * If in interactive mode (no `--model` provided), the chosen provider will be prompted, then its *available models will be dynamically fetched and listed*, with a preferred default highlighted.
-        * Add `python-dotenv` to `environment.yml`.
+        * Implement `python-dotenv` for loading `.env` variables (already done).
+        * Create `src/config_loader.py` to manage configuration (already done).
+        * Update `src/main.py` CLI entry point:
+            * Improve interactive prompt for provider selection: present numbered choices, highlight preferred default from `.env`.
+            * This part will NOT yet dynamically list *models* from providers; that comes after Task 7/8.
+        * Ensure `python -m src.main` is clearly documented as the way to run the application.
 * [ ] Task 7: Abstract AI Interface with Model Listing
-    * **Objective:** Define a common interface for AI models, including a method to list available models.
+    * **Objective:** Define a common interface for AI models, *including a method to list available models from the provider*.
     * **Details:**
         * Create `src/ai_models/base.py`.
         * Define an abstract base class (ABC) with methods like `extract_company_info(self, company_name: str) -> dict` and `list_available_models(self) -> list[str]`.
-        * Consider defining a `get_preferred_model(self) -> str` property/method for the model to be highlighted as default, potentially loaded from config.
-* [ ] Task 8: OpenAI Integration (with Model Listing)
-    * **Objective:** Implement OpenAI concrete class supporting information extraction and model listing.
+        * Include a `get_preferred_model(self) -> str` property/method to retrieve the preferred default model for that provider (from config).
+* [ ] Task 8: OpenAI Integration (Initial: `extract_company_info` & `list_available_models`)
+    * **Objective:** Implement the concrete class for OpenAI, focusing on basic info extraction and *crucially, the `list_available_models` method*.
     * **Details:**
         * Create `src/ai_models/openai_model.py`.
         * Implement `OpenAIModel` adhering to the interface.
         * Implement `list_available_models()` using OpenAI's API.
-        * Implement `extract_company_info()` with initial prompt engineering.
+        * Implement a basic `extract_company_info()` (prompt engineering can be refined later).
         * Add `openai` library to `environment.yml`.
+* [ ] Task 6 (Part 2 - Complete Dynamic Model Selection)
+    * **Objective:** Revisit `src/main.py` to fully integrate dynamic model listing and selection after provider choice.
+    * **Details:**
+        * Call `ai_instance.list_available_models()` after provider selection.
+        * Present the discovered models to the user (numbered, with preferred default highlighted).
+        * Allow the user to select a specific model.
 * [ ] Task 9: Google AI (Gemini) Integration (with Model Listing)
-    * **Objective:** Implement Google AI concrete class supporting information extraction and model listing.
-    * **Details:**
-        * Create `src/ai_models/google_ai_model.py`.
-        * Implement `GoogleAIModel` adhering to the interface.
-        * Implement `list_available_models()` using Google AI's API.
-        * Implement `extract_company_info()` with initial prompt engineering.
-        * Add `google-generativeai` library to `environment.yml`.
+    * **Objective:** Implement the concrete class for Google AI, including its `list_available_models` method.
+    * **Details:** (Similar to Task 8 for Google AI API)
 * [ ] Task 10: Ollama/Oobabooga Integration (with Model Listing)
-    * **Objective:** Implement Ollama/Oobabooga concrete class supporting information extraction and model listing.
-    * **Details:**
-        * Create `src/ai_models/ollama_model.py`.
-        * Implement `OllamaModel` adhering to the interface.
-        * Implement `list_available_models()` using Ollama's API.
-        * Implement `extract_company_info()` with initial prompt engineering.
-        * Add `requests` (and/or `ollama` client) to `environment.yml`.
+    * **Objective:** Implement the concrete class for local LLMs, including its `list_available_models` method.
+    * **Details:** (Similar to Task 8 for Ollama API)
 * [ ] Task 11: Core Agent Orchestration (Single Company Processing)
-    * **Objective:** Build the main agent logic to process a single company using the selected AI model and apply basic error handling.
-    * **Details:**
-        * Modify `src/main.py` (or create an `src/agent.py` module).
-        * Integrate the configuration loading and AI model selection logic.
-        * Implement a function `process_single_company(company_name: str, ai_model_instance) -> dict`.
-        * Call the chosen AI's `extract_company_info` method.
-        * Implement initial *basic* parsing of the AI's raw text response into a structured dictionary/JSON. (This will be refined later).
-        * Implement basic error handling: if the AI call fails or parsing fails for a company, log the error and return an empty/error dictionary for that company (no retries yet, as per requirement).
-        * For now, print the extracted (or error) dictionary to the console.
-        * Implement the 1-minute timeout per company call.
-
+    * **Objective:** Build the main agent logic to process a single company using the selected AI model.
+    * **Details:** (Remains largely the same, integrating the fully selected AI model instance).
 ---
 
 ## Logging
