@@ -22,6 +22,8 @@ To set up your development environment and install dependencies, please refer to
 
 ### Phase 2: Core Agent Logic & AI Integration
 
+### Phase 2: Core Agent Logic & AI Integration
+
 * [x] Task 6: Configuration Loading & CLI for Provider Selection (Part 1 - Improved UX)
     * **Objective:** Load environment variables from `.env` and allow the user to select the desired AI *provider* via the CLI with improved interactive experience (numbered choices, default highlighting).
     * **Details:**
@@ -37,7 +39,7 @@ To set up your development environment and install dependencies, please refer to
         * Create `src/ai_models/base.py`.
         * Define an abstract base class (ABC) with methods like `extract_company_info(self, company_name: str) -> dict` and `list_available_models(self) -> list[str]`.
         * Include a `get_preferred_model(self) -> str` property/method to retrieve the preferred default model for that provider (from config).
-* [ ] Task 8: OpenAI Integration (Initial: `extract_company_info` & `list_available_models`) (In Progress)
+* [x] Task 8: OpenAI Integration (Initial: `extract_company_info` & `list_available_models`) (Completed)
     * **Objective:** Implement OpenAI concrete class supporting information extraction and model listing.
     * **Details:**
         * Create `src/ai_models/openai_model.py`.
@@ -45,7 +47,7 @@ To set up your development environment and install dependencies, please refer to
         * Implement `list_available_models()` using OpenAI's API.
         * Implement a basic `extract_company_info()` (prompt engineering can be refined later).
         * Add `openai` library to `environment.yml`.
-* [ ] Task 6 (Part 2 - Complete Dynamic Model Selection)
+* [ ] Task 6 (Part 2 - Complete Dynamic Model Selection) (In Progress)
     * **Objective:** Revisit `src/main.py` to fully integrate dynamic model listing and selection after provider choice.
     * **Details:**
         * Call `ai_instance.list_available_models()` after provider selection.
