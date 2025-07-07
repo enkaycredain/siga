@@ -28,17 +28,17 @@ To set up your development environment and install dependencies, please refer to
         * Implement `python-dotenv` for loading `.env` variables (already done).
         * Create `src/config_loader.py` to manage configuration (already done).
         * Update `src/main.py` CLI entry point:
-            * Improve interactive prompt for provider selection: present numbered choices, highlight preferred default from `.env`.
+            * Improved interactive prompt for provider selection: present numbered choices, highlight preferred default from `.env`.
             * This part will NOT yet dynamically list *models* from providers; that comes after Task 7/8.
         * Ensure `python -m src.main` is clearly documented as the way to run the application.
-* [ ] Task 7: Abstract AI Interface with Model Listing
+* [ ] Task 7: Abstract AI Interface with Model Listing (In Progress)
     * **Objective:** Define a common interface for AI models, *including a method to list available models from the provider*.
     * **Details:**
         * Create `src/ai_models/base.py`.
         * Define an abstract base class (ABC) with methods like `extract_company_info(self, company_name: str) -> dict` and `list_available_models(self) -> list[str]`.
         * Include a `get_preferred_model(self) -> str` property/method to retrieve the preferred default model for that provider (from config).
 * [ ] Task 8: OpenAI Integration (Initial: `extract_company_info` & `list_available_models`)
-    * **Objective:** Implement the concrete class for OpenAI, focusing on basic info extraction and *crucially, the `list_available_models` method*.
+    * **Objective:** Implement OpenAI concrete class supporting information extraction and model listing.
     * **Details:**
         * Create `src/ai_models/openai_model.py`.
         * Implement `OpenAIModel` adhering to the interface.
@@ -52,10 +52,10 @@ To set up your development environment and install dependencies, please refer to
         * Present the discovered models to the user (numbered, with preferred default highlighted).
         * Allow the user to select a specific model.
 * [ ] Task 9: Google AI (Gemini) Integration (with Model Listing)
-    * **Objective:** Implement the concrete class for Google AI, including its `list_available_models` method.
+    * **Objective:** Implement Google AI concrete class, including its `list_available_models` method.
     * **Details:** (Similar to Task 8 for Google AI API)
 * [ ] Task 10: Ollama/Oobabooga Integration (with Model Listing)
-    * **Objective:** Implement the concrete class for local LLMs, including its `list_available_models` method.
+    * **Objective:** Implement Ollama/Oobabooga concrete class, including its `list_available_models` method.
     * **Details:** (Similar to Task 8 for Ollama API)
 * [ ] Task 11: Core Agent Orchestration (Single Company Processing)
     * **Objective:** Build the main agent logic to process a single company using the selected AI model.
