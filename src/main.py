@@ -109,9 +109,9 @@ def main():
             if args.provider == "openai":
                 ai_instance = OpenAIModel(config)
              elif args.provider == "google_ai":
-                 ai_instance = GoogleAIModel(config) # Uncomment when implemented
-            # elif args.provider == "ollama":
-            #     ai_instance = OllamaModel(config)   # Uncomment when implemented
+                 ai_instance = GoogleAIModel(config)  
+            elif args.provider == "ollama":
+                 ai_instance = OllamaModel(config)   
             else:
                 siya_logger.error(f"AI provider '{args.provider}' is not yet implemented or recognized.")
                 return

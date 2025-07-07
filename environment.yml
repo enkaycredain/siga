@@ -24,4 +24,5 @@ dependencies:
   - python-dotenv #
   - openai
   - google-generativeai
+  - requests
 prefix: /opt/anaconda3/envs/siya_env
